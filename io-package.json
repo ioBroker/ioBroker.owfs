@@ -1,0 +1,48 @@
+{
+    "common": {
+        "name":                     "owfs",
+        "version":                  "0.0.1",
+        "title":                    "OWFS Adapter",
+        "desc":                     {
+            "en": "This adapter cyclic polls configured IPs.",
+            "de": "Adapter fragt zyklisch konfigurierte IP Addressen ab",
+            "ru": "Драйвер опрашивает заданные IP адреса постоянно при помощи утилиты PING"
+        },
+        "authors": [
+            "bluefox <bluefox@ccu.io>"
+        ],
+        "license":                  "MIT",
+        "platform":                 "Javascript/Node.js",
+        "mode":                     "daemon",
+        "availableModes":           ["daemon"],
+        "readme":                   "https://github.com/ioBroker/ioBroker.owfs/blob/master/README.md",
+        "loglevel":                 "info",
+        "icon":                     "owfs.png",
+        "keywords":                 ["owfs", "one wire", "1wire"],
+        "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.owfs/master/admin/owfs.png",
+        "type":                     "hardware"
+    },
+    "native": {
+        "ip":       "127.0.0.1",
+        "port":     4304,
+        "interval": 30,
+        "timeout":  3000,
+        "wires" : [
+          {
+            "name": "Sensor1",
+            "id": "10.C8F148010800",
+            "room": "",
+            "property": "temperature"
+          },
+          {
+            "name": "Sensor2",
+            "id": "10.040349010801",
+            "room": "",
+            "property": "temperature"
+          }
+        ]
+    },
+    "objects": [
+
+    ]
+}
