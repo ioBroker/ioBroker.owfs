@@ -1,7 +1,7 @@
 {
   "name": "iobroker.owfs",
   "description": "This adapter enable read and control of 1wire sensors over owfs server from ioBroker.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "bluefox <bluefox@ccu.io>",
   "contributors": [
     "bluefox <bluefox@ccu.io>"
