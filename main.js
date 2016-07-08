@@ -73,9 +73,13 @@ function writeWire(wire, value) {
         adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + value + '"');
         client.write('/' + wire.id + '/' + (wire.property || 'temperature'), value, function(err, message) {
             adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ':' + message);
+            
             //no idea what is received here
             if (err) {
                 adapter.log.warn('Cannot write value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
+                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84});
+            } else {
+                adapter.setState('wires.' + wire._name, parseFloat(value) || 0, true);
             }
         });
     }
@@ -85,9 +89,13 @@ function readWire(wire) {
     if (wire) {
         client.read('/' + wire.id + '/' + (wire.property || 'temperature'), function(err, result) {
             adapter.log.debug('Read /' + wire.id + '/' + (wire.property || 'temperature') + ':' + result);
+            result = result || '0';
+            result = result.trim();
+            
             if (!err) {
-                adapter.setState('wires.' + wire._name, result, true);
+                adapter.setState('wires.' + wire._name, parseFloat(result) || 0, true);
             } else {
+                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
                 adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
             }
         });
@@ -101,19 +109,17 @@ function pollAll() {
 }
 
 function createState(wire, callback) {
-    if (wire.room) adapter.addStateToEnum('room', wire.room, '', 'wires', wire._name);
-
     adapter.createState('', 'wires', wire._name, {
-        name:   (wire.name || wire.id),
-        def:    false,
-        type:   'number',
-        read:   'true',
-        write:  'true',
-        role:   'value.' + (wire.property || 'temperature'),
-        desc:   '1wire sensor'
+        name:       (wire.name || wire.id),
+        def:        0,
+        type:       'number',
+        read:       true,
+        write:      true,
+        role:       'value.' + (wire.property || 'temperature'),
+        desc:       '1wire sensor'
     }, {
-        id: wire.id,
-        property: wire.property
+        id:         wire.id,
+        property:   wire.property
     }, callback);
 }
 
@@ -160,16 +166,10 @@ function syncConfig() {
                                         name: (adapter.config.wires[u].name || adapter.config.wires[u].id)
                                     },
                                     native: {
-                                        id: adapter.config.wires[u].id,
+                                        id:       adapter.config.wires[u].id,
                                         property: adapter.config.wires[u].property
                                     }
                                 });
-                            }
-
-                            if (adapter.config.wires[u].room) {
-                                adapter.addStateToEnum('room', adapter.config.wires[u].room, '', 'wires', _states[j]._id);
-                            } else {
-                                adapter.deleteStateFromEnum('room', '', 'wires', _states[j]._id);
                             }
                         }
                     }
@@ -188,7 +188,6 @@ function syncConfig() {
         }
         if (configToDelete.length) {
             for (var e = 0; e < configToDelete.length; e++) {
-                adapter.deleteStateFromEnum('room', '', 'wires', configToDelete[e]);
                 adapter.deleteState('', 'wires', configToDelete[e]);
             }
         }

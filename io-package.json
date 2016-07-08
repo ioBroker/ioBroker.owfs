@@ -1,7 +1,14 @@
 {
     "common": {
         "name":                     "owfs",
-        "version":                  "0.0.2",
+        "version":                  "0.1.0",
+        "news": {
+          "0.1.0": {
+            "en": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
+            "de": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
+            "ru": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes"
+          }
+        },
         "title":                    "OWFS Adapter",
         "desc":                     {
             "en": "One wire file system adapter for ioBroker.",
@@ -9,7 +16,7 @@
             "ru": "'One wire file system' драйвер для ioBroker"
         },
         "authors": [
-            "bluefox <bluefox@ccu.io>"
+            "bluefox <dogafox@gmail.com>"
         ],
         "license":                  "MIT",
         "platform":                 "Javascript/Node.js",
@@ -31,13 +38,11 @@
           {
             "name": "Sensor1",
             "id": "10.C8F148010800",
-            "room": "",
             "property": "temperature"
           },
           {
             "name": "Sensor2",
             "id": "10.040349010801",
-            "room": "",
             "property": "temperature"
           }
         ]

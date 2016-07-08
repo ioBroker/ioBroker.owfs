@@ -2,6 +2,12 @@
 ioBroker OWFS Adapter
 ==============
 
+[![NPM version](http://img.shields.io/npm/v/iobroker.owfs.svg)](https://www.npmjs.com/package/iobroker.owfs)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.owfs.svg)](https://www.npmjs.com/package/iobroker.owfs)
+
+[![NPM](https://nodei.co/npm/iobroker.owfs.png?downloads=true)](https://nodei.co/npm/iobroker.owfs/)
+
+
 # *One wire file system* adapter for ioBroker.
 
 Supported
@@ -18,6 +24,11 @@ http://sourceforge.net/projects/owfs/
 * Directory listings (must be done by someone who has 1wire)
 
 ## Changelog
+### 0.1.0 (2016-07-08)
+* (bluefox) remove rooms
+* (bluefox) fix creation of states
+* (bluefox) convert states to numbers
+* (bluefox) support of quality codes
 
 ### 0.0.1 (2014-11-02)
 * (bluefox) support of server (actual no authentication)

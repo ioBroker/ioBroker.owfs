@@ -1,5 +1,5 @@
 <html>
-
+<head>
 <!-- these 4 files always have to be included -->
 <link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
 <link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
@@ -30,17 +30,16 @@
 <script type="text/javascript">
     var wires = [];
     systemDictionary = {
-        "OWFS adapter settings":    {"en": "OWFS adapter settings", "de": "OWFS Adapter-Einstellungen", "ru": "Настройки драйвера OWFS"},
-        "OWFS server settings":     {"en": "OWFS server settings",  "de": "OWFS Server Einstellungen",  "ru": "Настройки сервера OWFS"},
-        "IP Address of OWFS Server:": {"en": "IP Address of OWFS Server:", "de": "IP Adresse vom OWFS-Server:", "ru": "IP адрес OWFS сервера:"},
-        "Port of OWFS Server:":     {"en": "Port of OWFS Server:",  "de": "Port vom OWFS-Server:",       "ru": "Порт OWFS сервера:"},
-        "Timeout(ms):":             {"en": "Timeout(ms):",          "de": "Timeout(ms):",               "ru": "Таймаут(мс):"},
-        "Poll interval(sec):":      {"en": "Poll interval(sec):",   "de": "Poll Intervall(sek):",        "ru": "Интервал опроса (сек):"},
-        "Wires addresses":          {"en": "Wires addresses",       "de": "Wires Addressen",            "ru": "Адреса сенсоров"},
-        "name":                     {"en": "Name",                  "de": "Name",                       "ru": "Имя сенсора"},
-        "id_":                      {"en": "Sensor ID",             "de": "Sensor ID",                  "ru": "ID сенсора"},
-        "property":                 {"en": "property",              "de": "property",                   "ru": "property"},
-        "room":                     {"en": "Room",                  "de": "Raum",                       "ru": "Комната"}
+        "OWFS adapter settings":    {"en": "OWFS adapter settings",         "de": "OWFS Adapter-Einstellungen",     "ru": "Настройки драйвера OWFS"},
+        "OWFS server settings":     {"en": "OWFS server settings",          "de": "OWFS Server Einstellungen",      "ru": "Настройки сервера OWFS"},
+        "IP Address of OWFS Server:": {"en": "IP Address of OWFS Server:",  "de": "IP Adresse vom OWFS-Server:",    "ru": "IP адрес OWFS сервера:"},
+        "Port of OWFS Server:":     {"en": "Port of OWFS Server:",          "de": "Port vom OWFS-Server:",          "ru": "Порт OWFS сервера:"},
+        "Timeout(ms):":             {"en": "Timeout(ms):",                  "de": "Timeout(ms):",                   "ru": "Таймаут(мс):"},
+        "Poll interval(sec):":      {"en": "Poll interval(sec):",           "de": "Poll Intervall(sek):",           "ru": "Интервал опроса (сек):"},
+        "Wires addresses":          {"en": "Wires addresses",               "de": "Wires Addressen",                "ru": "Адреса сенсоров"},
+        "name":                     {"en": "Name",                          "de": "Name",                           "ru": "Имя сенсора"},
+        "id_":                      {"en": "Sensor ID",                     "de": "Sensor ID",                      "ru": "ID сенсора"},
+        "property":                 {"en": "property",                      "de": "property",                       "ru": "property"}
     };
 
     function setValue(id, value, onChange) {
@@ -53,7 +52,7 @@
             $('#' + id + '.value').val(value).change(function() {
                 onChange();
             }).keyup(function() {
-                // Chack that only numbers entered
+                // Check that only numbers entered
                 if ($(this).hasClass('number')) {
                     var val = $(this).val();
                     if (val) {
@@ -86,11 +85,11 @@
         }
 
         for (var key in settings) {
-            if (key == 'wires') continue;
+            if (key === 'wires') continue;
             setValue(key, settings[key], onChange);
         }
 
-        editTable('wires', ['name', 'id_', 'property', 'room'], wires, 400);
+        editTable('wires', ['name', 'id_', 'property'], wires, 420);
 
         onChange(false);
     }
@@ -102,7 +101,7 @@
         var obj = {};
         $('.value').each(function () {
             var $this = $(this);
-            if ($this.attr('type') == 'checkbox') {
+            if ($this.attr('type') === 'checkbox') {
                 obj[$this.attr('id')] = $this.prop('checked');
             } else {
                 obj[$this.attr('id')] = $this.val();
@@ -110,7 +109,7 @@
         });
 
         // Get edited table
-        obj.wires = getTableResult('wires', ['name', 'id_', 'property', 'room']);
+        obj.wires = getTableResult('wires', ['name', 'id_', 'property']);
         // id is reserved word
         for (var t = 0; t < obj.wires.length; t++) {
             obj.wires[t].id = obj.wires[t].id_;
@@ -120,10 +119,10 @@
         callback(obj);
     }
 </script>
-
+</head>
+<body>
 <!-- you have to put your config page in a div with id adapter-container -->
 <div id="adapter-container">
-
     <table><tr>
         <td><img src="owfs.png" width="64" height="64"></td>
         <td style="padding-top: 20px; padding-left: 10px"><h3 class="translate">OWFS adapter settings</h3></td>
@@ -139,4 +138,5 @@
     <h4 class="translate">Wires addresses</h4>
     <table id="wires"></table><div id="pager-wires"></div>
 </div>
+</body>
 </html>
