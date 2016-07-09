@@ -2,20 +2,20 @@
  *
  *      ioBroker OWFS Adapter
  *
- *      Copyright (c) 2015 bluefox<dogafox@gmail.com>
+ *      Copyright (c) 2015-2016 bluefox<dogafox@gmail.com>
  *
  *      MIT License
  *
  */
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
-"use strict";
-var utils =   require(__dirname + '/lib/utils'); // Get common adapter utils
+'use strict';
+var utils   = require(__dirname + '/lib/utils'); // Get common adapter utils
 var adapter = utils.adapter('owfs');
-var OWFS =    require('owfs').Client;
+var OWFS    = require('owfs').Client;
 
-var timer =   null;
-var client =  null;
+var timer   = null;
+var client  = null;
 
 adapter.on('message', function (obj) {
     if (obj) processMessage(obj);
@@ -36,7 +36,7 @@ adapter.on('unload', function () {
 adapter.on('stateChange', function (id, state) {
     if (!id || !state || state.ack) return;
     for (var i = 0; i < adapter.config.wires.length; i++) {
-        if (id == adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
+        if (id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
             if (state.val === true || state.val === 'true') {
                 state.val = 1;
             } else
@@ -71,10 +71,11 @@ function processMessages() {
 function writeWire(wire, value) {
     if (wire) {
         adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + value + '"');
-        client.write('/' + wire.id + '/' + (wire.property || 'temperature'), value, function(err, message) {
-            adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ':' + message);
-            
-            //no idea what is received here
+        client.write('/' + wire.id + '/' + (wire.property || 'temperature'), value, function (err, message) {
+            if (message !== undefined) {
+                adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ':' + message);
+            }
+            // no idea what is received here
             if (err) {
                 adapter.log.warn('Cannot write value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
                 adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84});
@@ -166,7 +167,7 @@ function syncConfig() {
                                         name: (adapter.config.wires[u].name || adapter.config.wires[u].id)
                                     },
                                     native: {
-                                        id:       adapter.config.wires[u].id,
+                                        id: adapter.config.wires[u].id,
                                         property: adapter.config.wires[u].property
                                     }
                                 });
