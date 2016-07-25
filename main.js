@@ -35,8 +35,9 @@ adapter.on('unload', function () {
 
 adapter.on('stateChange', function (id, state) {
     if (!id || !state || state.ack) return;
+    if (!adapter.config.wires) return;
     for (var i = 0; i < adapter.config.wires.length; i++) {
-        if (id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
+        if (adapter.config.wires[i] && id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
             if (state.val === true || state.val === 'true') {
                 state.val = 1;
             } else
@@ -104,8 +105,9 @@ function readWire(wire) {
 }
 
 function pollAll() {
+    if (!adapter.config.wires) return;
     for (var i = 0; i < adapter.config.wires.length; i++) {
-        readWire(adapter.config.wires[i]);
+        if (adapter.config.wires[i]) readWire(adapter.config.wires[i]);
     }
 }
 
@@ -144,6 +146,11 @@ function syncConfig() {
         var k;
         if (adapter.config.wires) {
             for (k = 0; k < adapter.config.wires.length; k++) {
+                if (!adapter.config.wires[k] || (!adapter.config.wires[k].name && !adapter.config.wires[k].id)) {
+                    adapter.log.error('Invalid config for wire with index ' + k);
+                    continue;
+                }
+
                 adapter.config.wires[k]._name = (adapter.config.wires[k].name || adapter.config.wires[k].id).replace(/[.\s\/]+/g, '_');
                 configToAdd.push(adapter.namespace + '.wires.' + adapter.config.wires[k]._name);
             }
@@ -153,35 +160,41 @@ function syncConfig() {
             for (var j = 0; j < _states.length; j++) {
                 var pos = configToAdd.indexOf(_states[j]._id);
                 // Entry still exists
-                if (pos != -1) {
+                if (pos !== -1) {
                     configToAdd.splice(pos, 1);
 
-                    // Check room, id and property
-                    for (var u = 0; u < adapter.config.wires.length; u++) {
-                        if (adapter.namespace + '.wires.' + adapter.config.wires[u]._name == _states[j]._id) {
-                            if (_states[j].common.name != (adapter.config.wires[u].name || adapter.config.wires[u].id) ||
-                                _states[j].native.id != adapter.config.wires[u].id ||
-                                _states[j].native.property != adapter.config.wires[u].property) {
-                                adapter.extendObject(_states[j]._id, {
-                                    common: {
-                                        name: (adapter.config.wires[u].name || adapter.config.wires[u].id)
-                                    },
-                                    native: {
-                                        id: adapter.config.wires[u].id,
-                                        property: adapter.config.wires[u].property
-                                    }
-                                });
+                    if (adapter.config.wires) {
+                        // Check room, id and property
+                        for (var u = 0; u < adapter.config.wires.length; u++) {
+                            if (!adapter.config.wires[u] || !adapter.config.wires[u]._name) continue;
+
+                            if (adapter.namespace + '.wires.' + adapter.config.wires[u]._name === _states[j]._id) {
+                                if (_states[j].common.name != (adapter.config.wires[u].name || adapter.config.wires[u].id) ||
+                                    _states[j].native.id != adapter.config.wires[u].id ||
+                                    _states[j].native.property != adapter.config.wires[u].property) {
+                                    adapter.extendObject(_states[j]._id, {
+                                        common: {
+                                            name: (adapter.config.wires[u].name || adapter.config.wires[u].id)
+                                        },
+                                        native: {
+                                            id: adapter.config.wires[u].id,
+                                            property: adapter.config.wires[u].property
+                                        }
+                                    });
+                                }
                             }
                         }
                     }
+
                 } else {
                     configToDelete.push(_states[j]._id);
                 }
             }
         }
 
-        if (configToAdd.length) {
+        if (configToAdd.length && adapter.config.wires) {
             for (var r = 0; r < adapter.config.wires.length; r++) {
+                if (!adapter.config.wires[r] || !adapter.config.wires[r]._name) continue;
                 if (configToAdd.indexOf(adapter.namespace + '.wires.' + adapter.config.wires[r]._name) != -1) {
                     addState(adapter.config.wires[r]);
                 }
