@@ -1,8 +1,13 @@
 {
     "common": {
         "name":                     "owfs",
-        "version":                  "0.1.0",
+        "version":                  "0.1.1",
         "news": {
+		  "0.1.1": {
+            "en": "check configuration",
+            "de": "check configuration",
+            "ru": "check configuration"
+          },
           "0.1.0": {
             "en": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
             "de": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",

@@ -24,6 +24,9 @@ http://sourceforge.net/projects/owfs/
 * Directory listings (must be done by someone who has 1wire)
 
 ## Changelog
+### 0.1.1 (2016-07-25)
+* (bluefox) check configuration
+
 ### 0.1.0 (2016-07-08)
 * (bluefox) remove rooms
 * (bluefox) fix creation of states
