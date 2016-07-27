@@ -12,7 +12,7 @@
 'use strict';
 var utils   = require(__dirname + '/lib/utils'); // Get common adapter utils
 var adapter = utils.adapter('owfs');
-var OWFS    = require('owfs').Client;
+var OWJS    = require('owjs');
 
 var timer   = null;
 var client  = null;
@@ -51,9 +51,63 @@ adapter.on('stateChange', function (id, state) {
     }
 });
 
-function processMessage(obj) {
-    if (!obj || !obj.command) return;
-    switch (obj.command) {
+function readSensors(oClient, sensors, result, cb) {
+    result = result || {};
+    if (!sensors || !sensors.length) {
+        return cb && cb(result);
+    }
+    var sensor = sensors.shift();
+
+    oClient.list('/' + sensor, function(err, dirs) {
+        result[sensor] = dirs;
+        if (dirs) {
+            for (var d = 0; d < dirs.length; d++) {
+                dirs[d] = dirs[d].substring(sensor.length + 2);
+            }
+        }
+        setTimeout(function () {
+            readSensors(oClient, sensors, result, cb);
+        }, 0);
+    });
+}
+
+function processMessage(msg) {
+    if (!msg || !msg.command) return;
+
+    switch (msg.command) {
+        case 'readir':
+            if (msg.callback) {
+                var _client;
+                if (msg.message.config && msg.message.config.ip) {
+                    _client = new OWJS.Client({host: msg.message.config.ip, port: msg.message.config.port});
+                } else {
+                    _client = client;
+                }
+
+                _client.list('/', function(err, dirs) {
+                    if (err) {
+                        adapter.log.error('Cannot read dir: ' + err)
+                        adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
+                        _client = null;
+                    } else {
+                        for (var d = dirs.length - 1; d >= 0; d--) {
+                            if (!dirs[d] || dirs[d][0] !== '/') {
+                                dirs.splice(d, 1);
+                            } else {
+                                dirs[d] = dirs[d].substring(1);
+                            }
+                        }
+
+                        // read all sensors
+                        readSensors(_client, dirs, null, function (result) {
+                            adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
+                            _client = null;
+                        });
+                    }
+                });
+            }
+
+            break;
         default:
             adapter.log.error('Messages are not supported');
             break;
@@ -74,14 +128,18 @@ function writeWire(wire, value) {
         adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + value + '"');
         client.write('/' + wire.id + '/' + (wire.property || 'temperature'), value, function (err, message) {
             if (message !== undefined) {
-                adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ':' + message);
+                adapter.log.debug('Write /' + wire.name + '/' + (wire.property || 'temperature') + ':' + message);
             }
             // no idea what is received here
             if (err) {
                 adapter.log.warn('Cannot write value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
-                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84});
+                adapter.setState('wires.' + wire.name, {val: 0, ack: true, q: 0x84});
             } else {
-                adapter.setState('wires.' + wire._name, parseFloat(value) || 0, true);
+                if (wire.property.indexOf('PIO') === -1) {
+                    adapter.setState('wires.' + wire.name, parseFloat(value) || 0, true);
+                } else {
+                    adapter.setState('wires.' + wire.name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
+                }
             }
         });
     }
@@ -90,14 +148,18 @@ function writeWire(wire, value) {
 function readWire(wire) {
     if (wire) {
         client.read('/' + wire.id + '/' + (wire.property || 'temperature'), function(err, result) {
-            adapter.log.debug('Read /' + wire.id + '/' + (wire.property || 'temperature') + ':' + result);
-            result = result || '0';
-            result = result.trim();
-            
+            result.value = result.value || '0';
+            result.value = result.value.trim();
+            adapter.log.debug('Read ' + result.path + ':' + result.value);
+
             if (!err) {
-                adapter.setState('wires.' + wire._name, parseFloat(result) || 0, true);
+                if (wire.property.indexOf('PIO') !== -1) {
+                    adapter.setState('wires.' + wire.name, (result.value == '1'), true);
+                } else {
+                    adapter.setState('wires.' + wire.name, parseFloat(result.value) || 0, true);
+                }
             } else {
-                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                adapter.setState('wires.' + wire.name, {val: 0, ack: true, q: 0x84}); // sensor reports error
                 adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
             }
         });
@@ -112,7 +174,7 @@ function pollAll() {
 }
 
 function createState(wire, callback) {
-    adapter.createState('', 'wires', wire._name, {
+    var obj = {
         name:       (wire.name || wire.id),
         def:        0,
         type:       'number',
@@ -120,7 +182,29 @@ function createState(wire, callback) {
         write:      true,
         role:       'value.' + (wire.property || 'temperature'),
         desc:       '1wire sensor'
-    }, {
+    };
+
+    if (obj.role === 'value.temperature') {
+        obj.role    = 'level.temperature';
+        obj.unit    = '°C';
+        obj.write   = false;
+    }
+
+    if (obj.role === 'value.humidity') {
+        obj.role    = 'level.humidity';
+        obj.unit    = '%';
+        obj.min     = 0;
+        obj.max     = 100;
+        obj.write   = false;
+    }
+
+    if (wire.property.indexOf('PIO') !== -1) {
+        obj.type = 'boolean';
+        obj.role = 'switch';
+        obj.def  = false;
+    }
+
+    adapter.createState('', 'wires', wire._name, obj, {
         id:         wire.id,
         property:   wire.property
     }, callback);
@@ -213,7 +297,7 @@ function main() {
         adapter.config.interval = 1;
     }
 
-    client = new OWFS(adapter.config.ip, adapter.config.port);
+    client = new OWJS.Client({host: adapter.config.ip, port: adapter.config.port});
 
     syncConfig();
 

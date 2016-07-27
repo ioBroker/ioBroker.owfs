@@ -12,7 +12,7 @@ ioBroker OWFS Adapter
 
 Supported
 
-This adapter uses the owfs library from https://www.npmjs.com/package/owfs and accordingly requires owfs server.
+This adapter uses the owfs library from https://www.npmjs.com/package/owjs and accordingly requires owfs server.
 
 ## Install OWFS Linux
 ```sudo apt-get install owfs```
@@ -20,10 +20,11 @@ This adapter uses the owfs library from https://www.npmjs.com/package/owfs and a
 ## Install OWFS windows
 http://sourceforge.net/projects/owfs/
 
-## Todo
-* Directory listings (must be done by someone who has 1wire)
-
 ## Changelog
+### 0.2.0 (2016-07-27)
+* (bluefox) discover sensors
+* (bluefox) use other npm library to fix write
+
 ### 0.1.1 (2016-07-25)
 * (bluefox) check configuration
 

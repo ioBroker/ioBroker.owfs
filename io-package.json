@@ -1,9 +1,14 @@
 {
     "common": {
         "name":                     "owfs",
-        "version":                  "0.1.1",
+        "version":                  "0.2.0",
         "news": {
-		  "0.1.1": {
+		  "0.2.0": {
+            "en": "discover sensors\nuse other npm library to fix write",
+            "de": "discover sensors\nuse other npm library to fix write",
+            "ru": "discover sensors\nuse other npm library to fix write"
+          },
+          "0.1.1": {
             "en": "check configuration",
             "de": "check configuration",
             "ru": "check configuration"
@@ -30,6 +35,8 @@
         "readme":                   "https://github.com/ioBroker/ioBroker.owfs/blob/master/README.md",
         "loglevel":                 "info",
         "icon":                     "owfs.png",
+        "messagebox":               true,
+        "subscribe":                "messagebox",
         "keywords":                 ["owfs", "one wire", "1wire"],
         "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.owfs/master/admin/owfs.png",
         "type":                     "hardware"
