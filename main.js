@@ -85,6 +85,9 @@ function readSensors(oClient, sensors, result, cb) {
         if (dirs) {
             for (var d = 0; d < dirs.length; d++) {
                 dirs[d] = dirs[d].substring(sensor.length + 2);
+                if (possibleSubTrees.indexOf(dirs[d]) !== -1) {
+                    sensors.push(sensor + '/' + dirs[d]);
+                }
             }
         }
         setTimeout(function () {
@@ -92,6 +95,13 @@ function readSensors(oClient, sensors, result, cb) {
         }, 0);
     });
 }
+
+var possibleSubTrees = [
+    'LED',
+    'relay',
+    'set_alarm'
+];
+
 
 function processMessage(msg) {
     if (!msg || !msg.command) return;

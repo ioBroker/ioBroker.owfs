@@ -21,6 +21,9 @@ This adapter uses the owfs library from https://www.npmjs.com/package/owjs and a
 http://sourceforge.net/projects/owfs/
 
 ## Changelog
+### 0.2.2 (2016-07-29)
+* (bluefox) add new datapoints: pressure, volts, ...
+
 ### 0.2.1 (2016-07-28)
 * (bluefox) fixes of write
 

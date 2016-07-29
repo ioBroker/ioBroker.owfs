@@ -1,8 +1,13 @@
 {
     "common": {
         "name":                     "owfs",
-        "version":                  "0.2.1",
+        "version":                  "0.2.2",
         "news": {
+		  "0.2.2": {
+            "en": "add new datapoints: pressure, volts, ...",
+            "de": "add new datapoints: pressure, volts, ...",
+            "ru": "add new datapoints: pressure, volts, ..."
+          },
 		  "0.2.1": {
             "en": "fixes of write",
             "de": "fixes of write",
