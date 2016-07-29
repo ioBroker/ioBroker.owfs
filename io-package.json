@@ -1,8 +1,13 @@
 {
     "common": {
         "name":                     "owfs",
-        "version":                  "0.2.0",
+        "version":                  "0.2.1",
         "news": {
+		  "0.2.1": {
+            "en": "fixes of write",
+            "de": "fixes of write",
+            "ru": "fixes of write"
+          },
 		  "0.2.0": {
             "en": "discover sensors\nuse other npm library to fix write",
             "de": "discover sensors\nuse other npm library to fix write",

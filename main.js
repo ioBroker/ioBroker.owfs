@@ -16,6 +16,7 @@ var OWJS    = require('owjs');
 
 var timer   = null;
 var client  = null;
+var objects = {};
 
 adapter.on('message', function (obj) {
     if (obj) processMessage(obj);
@@ -36,6 +37,8 @@ adapter.on('unload', function () {
 adapter.on('stateChange', function (id, state) {
     if (!id || !state || state.ack) return;
     if (!adapter.config.wires) return;
+
+    var wire;
     for (var i = 0; i < adapter.config.wires.length; i++) {
         if (adapter.config.wires[i] && id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
             if (state.val === true || state.val === 'true') {
@@ -44,10 +47,29 @@ adapter.on('stateChange', function (id, state) {
             if (state.val === false || state.val === 'false') {
                 state.val = 0;
             }
-
-            writeWire(adapter.config.wires[i], state.val);
+            wire = adapter.config.wires[i];
             break;
         }
+    }
+    if (wire) {
+        if (!objects[id]) {
+            adapter.getForeignObject(id, function (err, obj) {
+                objects[id] = obj;
+                if (obj && obj.common && !obj.common.write) {
+                    adapter.log.debug('Cannot write read only "' + id + '"');
+                    return;
+                }
+                writeWire(wire, state.val);
+            });
+        } else {
+            if (objects[id] && objects[id].common && !objects[id].common.write) {
+                adapter.log.debug('Cannot write read only "' + id + '"');
+                return;
+            }
+            writeWire(wire, state.val);
+        }
+    } else {
+        adapter.log.warn('Wire "' + id + '" not found');
     }
 });
 
@@ -128,17 +150,17 @@ function writeWire(wire, value) {
         adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + value + '"');
         client.write('/' + wire.id + '/' + (wire.property || 'temperature'), value, function (err, message) {
             if (message !== undefined) {
-                adapter.log.debug('Write /' + wire.name + '/' + (wire.property || 'temperature') + ':' + message);
+                adapter.log.debug('Response for write /' + wire.name + '/' + (wire.property || 'temperature') + ': ' + message);
             }
             // no idea what is received here
             if (err) {
-                adapter.log.warn('Cannot write value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
-                adapter.setState('wires.' + wire.name, {val: 0, ack: true, q: 0x84});
+                adapter.log.warn('Cannot write value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + JSON.stringify(err));
+                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84});
             } else {
                 if (wire.property.indexOf('PIO') === -1) {
-                    adapter.setState('wires.' + wire.name, parseFloat(value) || 0, true);
+                    adapter.setState('wires.' + wire._name, parseFloat(value) || 0, true);
                 } else {
-                    adapter.setState('wires.' + wire.name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
+                    adapter.setState('wires.' + wire._name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
                 }
             }
         });
@@ -154,12 +176,12 @@ function readWire(wire) {
 
             if (!err) {
                 if (wire.property.indexOf('PIO') !== -1) {
-                    adapter.setState('wires.' + wire.name, (result.value == '1'), true);
+                    adapter.setState('wires.' + wire._name, (result.value == '1'), true);
                 } else {
-                    adapter.setState('wires.' + wire.name, parseFloat(result.value) || 0, true);
+                    adapter.setState('wires.' + wire._name, parseFloat(result.value) || 0, true);
                 }
             } else {
-                adapter.setState('wires.' + wire.name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
                 adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
             }
         });
@@ -223,11 +245,12 @@ function addState(wire, callback) {
     });
 }
 
-function syncConfig() {
+function syncConfig(cb) {
     adapter.getStatesOf('', 'wires', function (err, _states) {
         var configToDelete = [];
         var configToAdd    = [];
         var k;
+        var count = 0;
         if (adapter.config.wires) {
             for (k = 0; k < adapter.config.wires.length; k++) {
                 if (!adapter.config.wires[k] || (!adapter.config.wires[k].name && !adapter.config.wires[k].id)) {
@@ -261,8 +284,8 @@ function syncConfig() {
                                             name: (adapter.config.wires[u].name || adapter.config.wires[u].id)
                                         },
                                         native: {
-                                            id: adapter.config.wires[u].id,
-                                            property: adapter.config.wires[u].property
+                                            id:         adapter.config.wires[u].id,
+                                            property:   adapter.config.wires[u].property
                                         }
                                     });
                                 }
@@ -280,15 +303,23 @@ function syncConfig() {
             for (var r = 0; r < adapter.config.wires.length; r++) {
                 if (!adapter.config.wires[r] || !adapter.config.wires[r]._name) continue;
                 if (configToAdd.indexOf(adapter.namespace + '.wires.' + adapter.config.wires[r]._name) != -1) {
-                    addState(adapter.config.wires[r]);
+                    count++;
+                    addState(adapter.config.wires[r], function () {
+                        if (!--count && cb) cb();
+                    });
                 }
             }
         }
         if (configToDelete.length) {
             for (var e = 0; e < configToDelete.length; e++) {
-                adapter.deleteState('', 'wires', configToDelete[e]);
+                count++
+                adapter.deleteState('', 'wires', configToDelete[e], function () {
+                    if (!--count && cb) cb();
+                });
             }
         }
+
+        if (!count && cb) cb();
     });
 }
 
