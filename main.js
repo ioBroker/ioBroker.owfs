@@ -12,11 +12,13 @@
 'use strict';
 var utils   = require(__dirname + '/lib/utils'); // Get common adapter utils
 var adapter = utils.adapter('owfs');
-var OWJS    = require('owjs');
+var OWJS    = null;
+var fs      = null;
 
 var timer   = null;
 var client  = null;
 var objects = {};
+var path1wire;
 
 adapter.on('message', function (obj) {
     if (obj) processMessage(obj);
@@ -52,6 +54,7 @@ adapter.on('stateChange', function (id, state) {
         }
     }
     if (wire) {
+        if (state.val === null) return;
         if (!objects[id]) {
             adapter.getForeignObject(id, function (err, obj) {
                 objects[id] = obj;
@@ -73,27 +76,45 @@ adapter.on('stateChange', function (id, state) {
     }
 });
 
-function readSensors(oClient, sensors, result, cb) {
+function readSensors(oClientOrPath, sensors, result, cb) {
     result = result || {};
     if (!sensors || !sensors.length) {
         return cb && cb(result);
     }
     var sensor = sensors.shift();
 
-    oClient.list('/' + sensor, function(err, dirs) {
-        result[sensor] = dirs;
-        if (dirs) {
-            for (var d = 0; d < dirs.length; d++) {
-                dirs[d] = dirs[d].substring(sensor.length + 2);
-                if (possibleSubTrees.indexOf(dirs[d]) !== -1) {
-                    sensors.push(sensor + '/' + dirs[d]);
+    if (typeof oClientOrPath === 'object') {
+        oClientOrPath.list('/' + sensor, function(err, dirs) {
+            result[sensor] = dirs;
+            if (dirs) {
+                for (var d = 0; d < dirs.length; d++) {
+                    if (dirs[d].substring(0, sensor.length + 2) === '/' + sensor + '/') {
+                        dirs[d] = dirs[d].substring(sensor.length + 2);
+                    }
+                    if (possibleSubTrees.indexOf(dirs[d]) !== -1) {
+                        sensors.push(sensor + '/' + dirs[d]);
+                    }
                 }
             }
-        }
-        setTimeout(function () {
-            readSensors(oClient, sensors, result, cb);
-        }, 0);
-    });
+            setTimeout(function () {
+                readSensors(oClientOrPath, sensors, result, cb);
+            }, 0);
+        });
+    } else {
+        fs.readdir(oClientOrPath + '/' + sensor, function (err, dirs) {
+            result[sensor] = dirs;
+            if (dirs) {
+                for (var d = 0; d < dirs.length; d++) {
+                    if (possibleSubTrees.indexOf(dirs[d]) !== -1) {
+                        sensors.push(sensor + '/' + dirs[d]);
+                    }
+                }
+            }
+            setTimeout(function () {
+                readSensors(oClientOrPath, sensors, result, cb);
+            }, 0);
+        });
+    }
 }
 
 var possibleSubTrees = [
@@ -107,36 +128,57 @@ function processMessage(msg) {
     if (!msg || !msg.command) return;
 
     switch (msg.command) {
-        case 'readir':
+        case 'readdir':
             if (msg.callback) {
-                var _client;
+                var _client = null;
                 if (msg.message.config && msg.message.config.ip) {
+                    adapter.log.debug('Connect to ' + msg.message.config.ip + ':' + msg.message.config.port);
                     _client = new OWJS.Client({host: msg.message.config.ip, port: msg.message.config.port});
-                } else {
+                } else if (msg.message.config && !msg.message.config.path) {
                     _client = client;
                 }
 
-                _client.list('/', function(err, dirs) {
-                    if (err) {
-                        adapter.log.error('Cannot read dir: ' + err)
-                        adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
-                        _client = null;
-                    } else {
-                        for (var d = dirs.length - 1; d >= 0; d--) {
-                            if (!dirs[d] || dirs[d][0] !== '/') {
-                                dirs.splice(d, 1);
-                            } else {
-                                dirs[d] = dirs[d].substring(1);
+                if (_client) {
+                    _client.list('/', function(err, dirs) {
+                        if (err) {
+                            adapter.log.error('Cannot read dir: ' + err);
+                            adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
+                            _client = null;
+                        } else {
+                            for (var d = dirs.length - 1; d >= 0; d--) {
+                                if (!dirs[d] || dirs[d][0] !== '/') {
+                                    dirs.splice(d, 1);
+                                } else {
+                                    dirs[d] = dirs[d].substring(1);
+                                }
                             }
+
+                            // read all sensors
+                            readSensors(_client, dirs, null, function (result) {
+                                adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
+                                _client = null;
+                            });
+                        }
+                    });
+                } else {
+                    var _path1wire =  msg.message.config ? msg.message.config.path || '/mnt/1wire' : '/mnt/1wire';
+                    if (_path1wire[_path1wire.length - 1] === '/') _path1wire = _path1wire.substring(0, _path1wire.length - 1);
+                    fs.readdir(_path1wire, function (err, dirs) {
+                        if (!dirs[d] || dirs[d].indexOf('.') === -1) {
+                            dirs.splice(d, 1);
                         }
 
-                        // read all sensors
-                        readSensors(_client, dirs, null, function (result) {
-                            adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
-                            _client = null;
-                        });
-                    }
-                });
+                        if (err) {
+                            adapter.log.error('Cannot read dir: ' + err);
+                            adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
+                        } else {
+                            // read all sensors
+                            readSensors(_path1wire, dirs, null, function (result) {
+                                adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
+                            });
+                        }
+                    });
+                }
             }
 
             break;
@@ -157,44 +199,121 @@ function processMessages() {
 
 function writeWire(wire, value) {
     if (wire) {
-        adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + value + '"');
-        client.write('/' + wire.id + '/' + (wire.property || 'temperature'), value, function (err, message) {
-            if (message !== undefined) {
-                adapter.log.debug('Response for write /' + wire.name + '/' + (wire.property || 'temperature') + ': ' + message);
-            }
-            // no idea what is received here
-            if (err) {
-                adapter.log.warn('Cannot write value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + JSON.stringify(err));
-                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84});
-            } else {
-                if (wire.property.indexOf('PIO') === -1) {
-                    adapter.setState('wires.' + wire._name, parseFloat(value) || 0, true);
-                } else {
-                    adapter.setState('wires.' + wire._name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
+        var property = (wire.property || 'temperature');
+        if (property === 'sensed.BYTE') property = 'PIO.BYTE';
+        var val;
+
+        if (property.indexOf('.ALL') !== -1) {
+            val = value;
+        } else
+        if (property.indexOf('PIO') !== -1 && property.indexOf('.BYTE') === -1) {
+            val = (value === '0' || value === 0 || value === 'false' || value === false) ? 0 : 1;
+        } else {
+            val = parseFloat(value) || 0;
+        }
+        
+        adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + val + '"');
+        if (client) {
+            client.write('/' + wire.id + '/' + property, val, function (err, message) {
+                if (message !== undefined) {
+                    adapter.log.debug('Response for write /' + wire.name + '/' + property + ': ' + message);
                 }
-            }
-        });
+                // no idea what is received here
+                if (err) {
+                    adapter.log.warn('Cannot write value of /' + wire.id + '/' + property + ': ' + JSON.stringify(err));
+                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84});
+                } else {
+                    // ALL is like "0,1"
+                    if (property.indexOf('.ALL') !== -1) {
+                        adapter.setState('wires.' + wire._name, value || '', true);
+                    } else
+                    // PIO.0, PIO.1, PIO.A are boolean    
+                    if (property.indexOf('PIO') !== -1 && property.indexOf('.BYTE') === -1) {
+                        adapter.setState('wires.' + wire._name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
+                    } else {
+                        // alse some float value, e.g. temperature
+                        adapter.setState('wires.' + wire._name, parseFloat(value) || 0, true);
+                    }
+                }
+            });
+        } else {
+            var pathFile = path1wire + '/' + wire.id + '/' + property;
+            
+            adapter.log.debug(pathFile + ' with "' + val + '"');
+            // Write to file
+            fs.writeFile(pathFile, val, function (err/*, written*/) {
+                if (err) {
+                    // Write error
+                    adapter.log.warn('Cannot write value of ' + pathFile + ': ' + JSON.stringify(err));
+                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84});
+                } else {
+                    // ALL is like "0,1"
+                    if (property.indexOf('.ALL') !== -1) {
+                        adapter.setState('wires.' + wire._name, value || '', true);
+                    } else
+                    // PIO.0, PIO.1, PIO.A are boolean    
+                    if (property.indexOf('PIO') !== -1 && property.indexOf('.BYTE') === -1) {
+                        adapter.setState('wires.' + wire._name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
+                    } else {
+                        // alse some float value, e.g. temperature
+                        adapter.setState('wires.' + wire._name, parseFloat(value) || 0, true);
+                    }
+                }
+            });
+        }
     }
 }
 
 function readWire(wire) {
     if (wire) {
-        client.read('/' + wire.id + '/' + (wire.property || 'temperature'), function(err, result) {
-            result.value = result.value || '0';
-            result.value = result.value.trim();
-            adapter.log.debug('Read ' + result.path + ':' + result.value);
+        if (client) {
+            client.read('/' + wire.id + '/' + (wire.property || 'temperature'), function(err, result) {
+                result.value = result.value || '0';
+                result.value = result.value.trim();
+                adapter.log.debug('Read ' + result.path + ':' + result.value);
 
-            if (!err) {
-                if (wire.property.indexOf('PIO') !== -1) {
-                    adapter.setState('wires.' + wire._name, (result.value == '1'), true);
+                if (!err) {
+                    // ALL is like "0,1"
+                    if (wire.property.indexOf('.ALL') !== -1) {
+                        adapter.setState('wires.' + wire._name, result.value || '', true);
+                    } else
+                    // PIO.0, PIO.1, PIO.A are boolean    
+                    if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
+                        adapter.setState('wires.' + wire._name, (result.value == '1'), true);
+                    } else {
+                        // alse some float value, e.g. temperature
+                        adapter.setState('wires.' + wire._name, parseFloat(result.value) || 0, true);
+                    }
                 } else {
-                    adapter.setState('wires.' + wire._name, parseFloat(result.value) || 0, true);
+                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                    adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
                 }
-            } else {
-                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
-                adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
-            }
-        });
+            });
+        } else {
+            var pathfile = path1wire + '/' + wire.id + '/' + (wire.property || 'temperature');
+            // Read from file
+            fs.readFile(pathfile, function (err, result) {
+                if (!err) {
+                    result = result.toString();
+                    adapter.log.debug('Read ' + pathfile + ': ' + result);
+
+                    // ALL is like "0,1"
+                    if (wire.property.indexOf('.ALL') !== -1) {
+                        adapter.setState('wires.' + wire._name, result || '', true);
+                    } else
+                    // PIO.0, PIO.1, PIO.A are boolean    
+                    if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
+                        adapter.setState('wires.' + wire._name, (result == '1'), true);
+                    } else {
+                        // alse some float value, e.g. temperature
+                        adapter.setState('wires.' + wire._name, parseFloat(result) || 0, true);
+                    }
+                } else {
+                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                    adapter.log.warn('Cannot read value of ' + pathfile + ': ' + err);
+                }
+            });
+        }
     }
 }
 
@@ -208,7 +327,6 @@ function pollAll() {
 function createState(wire, callback) {
     var obj = {
         name:       (wire.name || wire.id),
-        def:        0,
         type:       'number',
         read:       true,
         write:      true,
@@ -233,7 +351,6 @@ function createState(wire, callback) {
     if (wire.property.indexOf('PIO') !== -1) {
         obj.type = 'boolean';
         obj.role = 'switch';
-        obj.def  = false;
     }
 
     adapter.createState('', 'wires', wire._name, obj, {
@@ -338,7 +455,14 @@ function main() {
         adapter.config.interval = 1;
     }
 
-    client = new OWJS.Client({host: adapter.config.ip, port: adapter.config.port});
+    if (!adapter.config.local) {
+        OWJS = require('owjs');
+        client = new OWJS.Client({host: adapter.config.ip, port: adapter.config.port});
+    } else {
+        fs = require('fs');
+        path1wire = adapter.config.path || '/mnt/1wire';
+        if (path1wire[path1wire.length - 1] === '/') path1wire = path1wire.substring(0, path1wire.length - 1);
+    }
 
     syncConfig();
 

@@ -1,75 +1,81 @@
 {
-    "common": {
-        "name":                     "owfs",
-        "version":                  "0.2.2",
-        "news": {
-		  "0.2.2": {
-            "en": "add new datapoints: pressure, volts, ...",
-            "de": "add new datapoints: pressure, volts, ...",
-            "ru": "add new datapoints: pressure, volts, ..."
-          },
-		  "0.2.1": {
-            "en": "fixes of write",
-            "de": "fixes of write",
-            "ru": "fixes of write"
-          },
-		  "0.2.0": {
-            "en": "discover sensors\nuse other npm library to fix write",
-            "de": "discover sensors\nuse other npm library to fix write",
-            "ru": "discover sensors\nuse other npm library to fix write"
-          },
-          "0.1.1": {
-            "en": "check configuration",
-            "de": "check configuration",
-            "ru": "check configuration"
-          },
-          "0.1.0": {
-            "en": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
-            "de": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
-            "ru": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes"
-          }
-        },
-        "title":                    "OWFS Adapter",
-        "desc":                     {
-            "en": "One wire file system adapter for ioBroker.",
-            "de": "'One wire file system' Adapter für ioBroker",
-            "ru": "'One wire file system' драйвер для ioBroker"
-        },
-        "authors": [
-            "bluefox <dogafox@gmail.com>"
-        ],
-        "license":                  "MIT",
-        "platform":                 "Javascript/Node.js",
-        "mode":                     "daemon",
-        "availableModes":           ["daemon"],
-        "readme":                   "https://github.com/ioBroker/ioBroker.owfs/blob/master/README.md",
-        "loglevel":                 "info",
-        "icon":                     "owfs.png",
-        "messagebox":               true,
-        "subscribe":                "messagebox",
-        "keywords":                 ["owfs", "one wire", "1wire"],
-        "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.owfs/master/admin/owfs.png",
-        "type":                     "hardware"
+  "common": {
+    "name":                     "owfs",
+    "version":                  "0.3.0",
+    "news": {
+      "0.3.0": {
+        "en": "support of local OWFS via file system",
+        "de": "Unterstützung von LokalOWFS mit Dateisystem",
+        "ru": "Поддержка локальной OWFS через файловую систему"
+      },
+      "0.2.2": {
+        "en": "add new datapoints: pressure, volts, ...",
+        "de": "add new datapoints: pressure, volts, ...",
+        "ru": "add new datapoints: pressure, volts, ..."
+      },
+      "0.2.1": {
+        "en": "fixes of write",
+        "de": "fixes of write",
+        "ru": "fixes of write"
+      },
+      "0.2.0": {
+        "en": "discover sensors\nuse other npm library to fix write",
+        "de": "discover sensors\nuse other npm library to fix write",
+        "ru": "discover sensors\nuse other npm library to fix write"
+      },
+      "0.1.1": {
+        "en": "check configuration",
+        "de": "check configuration",
+        "ru": "check configuration"
+      },
+      "0.1.0": {
+        "en": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
+        "de": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
+        "ru": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes"
+      }
     },
-    "native": {
-        "ip":       "127.0.0.1",
-        "port":     4304,
-        "interval": 30,
-        "timeout":  3000,
-        "wires" : [
-          {
-            "name": "Sensor1",
-            "id": "10.C8F148010800",
-            "property": "temperature"
-          },
-          {
-            "name": "Sensor2",
-            "id": "10.040349010801",
-            "property": "temperature"
-          }
-        ]
+    "title":                    "OWFS Adapter",
+    "desc":                     {
+      "en": "One wire file system adapter for ioBroker.",
+      "de": "'One wire file system' Adapter für ioBroker",
+      "ru": "'One wire file system' драйвер для ioBroker"
     },
-    "objects": [
-
+    "authors": [
+      "bluefox <dogafox@gmail.com>"
+    ],
+    "license":                  "MIT",
+    "platform":                 "Javascript/Node.js",
+    "mode":                     "daemon",
+    "availableModes":           ["daemon"],
+    "readme":                   "https://github.com/ioBroker/ioBroker.owfs/blob/master/README.md",
+    "loglevel":                 "info",
+    "icon":                     "owfs.png",
+    "messagebox":               true,
+    "subscribe":                "messagebox",
+    "keywords":                 ["owfs", "one wire", "1wire"],
+    "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.owfs/master/admin/owfs.png",
+    "type":                     "hardware"
+  },
+  "native": {
+    "local":    false,
+    "path":     "/mnt/1wire",
+    "ip":       "127.0.0.1",
+    "port":     4304,
+    "interval": 30,
+    "wires" : [
+      {
+        "name": "Sensor1",
+        "id": "10.C8F148010800",
+        "property": "temperature"
+      },
+      {
+        "name": "Sensor2",
+        "id": "10.040349010801",
+        "property": "temperature"
+      }
     ]
+  },
+  "objects": [
+
+  ]
 }

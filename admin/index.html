@@ -1,275 +1,297 @@
 <html>
 <head>
-<!-- these 4 files always have to be included -->
-<link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
-<link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
-<link rel="stylesheet" type="text/css" href="../../lib/css/jquery.multiselect-1.13.css"/>
-<script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
-<script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
-<script type="text/javascript" src="../../lib/js/jqGrid/jquery.jqGrid-4.5.4.min.js"></script>
-<script type="text/javascript" src="../../lib/js/jqGrid/grid.locale-all.js"></script>
+    <!-- these 4 files always have to be included -->
+    <link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
+    <link rel="stylesheet" type="text/css" href="../../lib/css/jquery.multiselect-1.13.css"/>
+    <script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
+    <script type="text/javascript" src="../../lib/js/jqGrid/jquery.jqGrid-4.5.4.min.js"></script>
+    <script type="text/javascript" src="../../lib/js/jqGrid/grid.locale-all.js"></script>
 
 
-<!-- these two file always have to be included -->
-<link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
-<script type="text/javascript" src="../../js/translate.js"></script>
-<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+    <!-- these two file always have to be included -->
+    <link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+    <script type="text/javascript" src="../../js/translate.js"></script>
+    <script type="text/javascript" src="../../js/adapter-settings.js"></script>
 
-<style>
-    .table_header {
-        background-color: blue;
-        color: white;
-    }
-    .ip {
-        width: 150px;
-        text-align: right;
-    }
-</style>
-<!-- you have to define 2 functions in the global scope: -->
-<script type="text/javascript">
-    var wires = [];
-    systemDictionary = {
-        "OWFS adapter settings":    {"en": "OWFS adapter settings",         "de": "OWFS Adapter-Einstellungen",     "ru": "Настройки драйвера OWFS"},
-        "OWFS server settings":     {"en": "OWFS server settings",          "de": "OWFS Server Einstellungen",      "ru": "Настройки сервера OWFS"},
-        "IP Address of OWFS Server:": {"en": "IP Address of OWFS Server:",  "de": "IP Adresse vom OWFS-Server:",    "ru": "IP адрес OWFS сервера:"},
-        "Port of OWFS Server:":     {"en": "Port of OWFS Server:",          "de": "Port vom OWFS-Server:",          "ru": "Порт OWFS сервера:"},
-        "Timeout(ms):":             {"en": "Timeout(ms):",                  "de": "Timeout(ms):",                   "ru": "Таймаут(мс):"},
-        "Poll interval(sec):":      {"en": "Poll interval(sec):",           "de": "Poll Intervall(sek):",           "ru": "Интервал опроса (сек):"},
-        "Wires addresses":          {"en": "Wires addresses",               "de": "Wires Addressen",                "ru": "Адреса сенсоров"},
-        "Found %s sensors":         {"en": "Found %s sensors",              "de": "%s Sensoren gefunden",           "ru": "Найдено %s сенсор(a/ов)"},
-        "name":                     {"en": "Name",                          "de": "Name",                           "ru": "Имя сенсора"},
-        "id_":                      {"en": "Sensor ID",                     "de": "Sensor ID",                      "ru": "ID сенсора"},
-        "property":                 {"en": "property",                      "de": "property",                       "ru": "property"},
-        "Read addresses":           {"en": "Read addresses",                "de": "Adressen lesen",                 "ru": "Поиск сенсоров"},
-        "Ok":                       {"en": "Ok",                            "de": "Ok",                             "ru": "Ok"},
-        "Start or enable adapter first": {
-            "en": "Start or enable adapter OWFS first",
-            "de": "Adapter muss zuerst aktiviert werden OWFS",
-            "ru": "Сначала надо активировать драйвер OWFS"
+    <style>
+        .table_header {
+            background-color: blue;
+            color: white;
         }
-    };
-
-    var possibleProperties = [
-        'humidity',
-        'pressure',
-        'inHg',
-        'vib_level',
-        'vib_peak',
-        'vib_min',
-        'vib_max',
-        'current.0',
-        'current.1',
-        'current.2',
-        'current.ALL',
-        'min_current.0',
-        'min_current.1',
-        'min_current.2',
-        'min_current.ALL',
-        'max_current.0',
-        'max_current.1',
-        'max_current.2',
-        'max_current.ALL',
-        'volts.0',
-        'volts.1',
-        'volts.2',
-        'volts.ALL',
-        'min_volts.0',
-        'min_volts.1',
-        'min_volts.2',
-        'min_volts.ALL',
-        'max_volts.0',
-        'max_volts.1',
-        'max_volts.2',
-        'max_volts.ALL',
-        'gain',
-        'offset',
-        'current',
-        'illuminance',
-        'relay/state',
-        'relay/control',
-        'LED/state',
-        'LED/control',
-        'resistance',
-        'dew_point',
-        'heat_index',
-        'humidex',
-        'light',
-        'temperature',
-        'fasttemp',
-        'set_alarm',
-        'date',
-        'PIO',
-        'PIO.A',
-        'PIO.B',
-        'PIO.0',
-        'PIO.1',
-        'PIO.2',
-        'PIO.3',
-        'PIO.4',
-        'PIO.5',
-        'PIO.6',
-        'PIO.7',
-        'PIO.ALL',
-        'PIO.BYTE',
-        'latch.0',
-        'latch.1',
-        'latch.2',
-        'latch.3',
-        'latch.4',
-        'latch.5',
-        'latch.6',
-        'latch.7',
-        'latch.ALL',
-        'latch.BYTE',
-        'sensed.BYTE'
-    ];
-
-    function getUniqueIndex(_wires, prefix) {
-        var i = 1;
-        var found;
-        do {
-            found = false;
-            for (var w = 0; w < _wires.length; w++) {
-                if (_wires[w].name.substring(0, (prefix + i).length) === prefix + i) {
-                    found = true;
-                    i++;
-                    break;
-                }
+        .ip {
+            width: 150px;
+            text-align: right;
+        }
+    </style>
+    <!-- you have to define 2 functions in the global scope: -->
+    <script type="text/javascript">
+        var wires = [];
+        systemDictionary = {
+            "OWFS adapter settings":    {"en": "OWFS adapter settings",         "de": "OWFS Adapter-Einstellungen",     "ru": "Настройки драйвера OWFS"},
+            "OWFS server settings":     {"en": "OWFS server settings",          "de": "OWFS Server Einstellungen",      "ru": "Настройки сервера OWFS"},
+            "IP Address of OWFS Server:": {"en": "IP Address of OWFS Server:",  "de": "IP Adresse vom OWFS-Server:",    "ru": "IP адрес OWFS сервера:"},
+            "Port of OWFS Server:":     {"en": "Port of OWFS Server:",          "de": "Port vom OWFS-Server:",          "ru": "Порт OWFS сервера:"},
+            "Poll interval(sec):":      {"en": "Poll interval(sec):",           "de": "Poll Intervall(sek):",           "ru": "Интервал опроса (сек):"},
+            "Wires addresses":          {"en": "Wires addresses",               "de": "Wires Addressen",                "ru": "Адреса сенсоров"},
+            "Found %s sensors":         {"en": "Found %s sensors",              "de": "%s Sensoren gefunden",           "ru": "Найдено %s сенсор(a/ов)"},
+            "name":                     {"en": "Name",                          "de": "Name",                           "ru": "Имя сенсора"},
+            "id_":                      {"en": "Sensor ID",                     "de": "Sensor ID",                      "ru": "ID сенсора"},
+            "property":                 {"en": "property",                      "de": "property",                       "ru": "property"},
+            "Read addresses":           {"en": "Read addresses",                "de": "Adressen lesen",                 "ru": "Поиск сенсоров"},
+            "Use local OWFS:":          {"en": "Use local OWFS:",               "de": "Lokal OWFS:",                    "ru": "Локальный OWFS:"},
+            "Path to OWFS mount:":      {"en": "Path to OWFS mount:",           "de": "Pfad zu OWFS-Mount:",            "ru": "Путь к OWFS точке монтирования:"},
+            "Ok":                       {"en": "Ok",                            "de": "Ok",                             "ru": "Ok"},
+            "Start or enable adapter first": {
+                "en": "Start or enable adapter OWFS first",
+                "de": "Adapter muss zuerst aktiviert werden OWFS",
+                "ru": "Сначала надо активировать драйвер OWFS"
             }
-        } while (found);
+        };
 
-        return prefix + i;
-    }
+        var possibleProperties = [
+            'humidity',
+            'pressure',
+            'inHg',
+            'vib_level',
+            'vib_peak',
+            'vib_min',
+            'vib_max',
+            'current.0',
+            'current.1',
+            'current.2',
+            'current.ALL',
+            'min_current.0',
+            'min_current.1',
+            'min_current.2',
+            'min_current.ALL',
+            'max_current.0',
+            'max_current.1',
+            'max_current.2',
+            'max_current.ALL',
+            'volts.0',
+            'volts.1',
+            'volts.2',
+            'volts.ALL',
+            'min_volts.0',
+            'min_volts.1',
+            'min_volts.2',
+            'min_volts.ALL',
+            'max_volts.0',
+            'max_volts.1',
+            'max_volts.2',
+            'max_volts.ALL',
+            'gain',
+            'offset',
+            'current',
+            'illuminance',
+            'relay/state',
+            'relay/control',
+            'LED/state',
+            'LED/control',
+            'resistance',
+            'dew_point',
+            'heat_index',
+            'humidex',
+            'light',
+            'temperature',
+            'fasttemp',
+            'set_alarm',
+            'date',
+            'PIO',
+            'PIO.A',
+            'PIO.B',
+            'PIO.0',
+            'PIO.1',
+            'PIO.2',
+            'PIO.3',
+            'PIO.4',
+            'PIO.5',
+            'PIO.6',
+            'PIO.7',
+            'PIO.ALL',
+            'PIO.BYTE',
+            'latch.0',
+            'latch.1',
+            'latch.2',
+            'latch.3',
+            'latch.4',
+            'latch.5',
+            'latch.6',
+            'latch.7',
+            'latch.ALL',
+            'latch.BYTE',
+            'sensed.BYTE'
+        ];
 
-
-    function setValue(id, value, onChange) {
-        // example: select elements with id=key and class=value and insert value
-        if ($('#' + id + '.value').attr('type') == 'checkbox') {
-            $('#' + id + '.value').prop('checked', value).change(function() {
-                onChange();
-            });
-        } else {
-            $('#' + id + '.value').val(value).change(function() {
-                onChange();
-            }).keyup(function() {
-                // Check that only numbers entered
-                if ($(this).hasClass('number')) {
-                    var val = $(this).val();
-                    if (val) {
-                        var newVal = '';
-                        for (var i = 0; i < val.length; i++) {
-                            if (val[i] >= '0' && val[i] <= '9') {
-                                newVal += val[i];
-                            }
-                        }
-
-                        if (val != newVal) $(this).val(newVal);
+        function getUniqueIndex(_wires, prefix) {
+            var i = 1;
+            var found;
+            do {
+                found = false;
+                for (var w = 0; w < _wires.length; w++) {
+                    if (_wires[w].name.substring(0, (prefix + i).length) === prefix + i) {
+                        found = true;
+                        i++;
+                        break;
                     }
                 }
+            } while (found);
 
-                onChange();
-            });
-        }
-    }
-
-    // the function loadSettings has to exist ...
-    function load(settings, onChange) {
-        if (!settings) return;
-
-        wires = settings.wires || [];
-
-        // id is reserved word
-        for (var t = 0; t < wires.length; t++) {
-            wires[t].id_ = wires[t].id;
-            delete wires[t].id;
+            return prefix + i;
         }
 
-        for (var key in settings) {
-            if (key === 'wires') continue;
-            setValue(key, settings[key], onChange);
-        }
 
-        editTable('wires', ['name', 'id_', 'property'], wires, 480);
-
-        $('#readdirs').button({
-            icons: {
-                primary: 'ui-icon-refresh'
-            }
-        }).click(function () {
-            getIsAdapterAlive(function (isAlive) {
-                if (isAlive) {
-                    $('#readdirs').button('option', 'disabled', false);
-                    sendTo(null, 'readir', {
-                        config: {
-                            ip:     $('#ip').val(),
-                            port:   $('#port').val()
-                        }
-                    }, function (response) {
-                        $('#readdirs').button('option', 'disabled', false);
-                        wires = getTableResult('wires', ['name', 'id_', 'property']);
-                        if (response.sensors) {
-                            var count = 0;
-                            for (var sensor in response.sensors) {
-                                var found = false;
-                                var attrs = [];
-                                for (var attr = 0; attr < response.sensors[sensor].length; attr++) {
-                                    if (possibleProperties.indexOf(response.sensors[sensor][attr]) !== -1) attrs.push(response.sensors[sensor][attr]);
+        function setValue(id, value, onChange) {
+            // example: select elements with id=key and class=value and insert value
+            if ($('#' + id + '.value').attr('type') == 'checkbox') {
+                $('#' + id + '.value').prop('checked', value).change(function() {
+                    onChange();
+                });
+            } else {
+                $('#' + id + '.value').val(value).change(function() {
+                    onChange();
+                }).keyup(function() {
+                    // Check that only numbers entered
+                    if ($(this).hasClass('number')) {
+                        var val = $(this).val();
+                        if (val) {
+                            var newVal = '';
+                            for (var i = 0; i < val.length; i++) {
+                                if (val[i] >= '0' && val[i] <= '9') {
+                                    newVal += val[i];
                                 }
-
-                                for (var j = 0; j < wires.length; j++) {
-                                    if (wires[j].id_ === sensor) {
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found) {
-                                    //If sensor not yet included
-                                    for (var a = 0; a < attrs.length; a++) {
-                                        addToTable('wires', {name: getUniqueIndex(wires, 'Sensor') + '_' + attrs[a], id_: sensor, property: attrs[a]});
-                                        wires = getTableResult('wires', ['name', 'id_', 'property']);
-                                        onChange(true);
-                                    }
-                                }
-                                count++;
                             }
+
+                            if (val != newVal) $(this).val(newVal);
                         }
-                        showMessage(response.error ? JSON.stringify(response.error, '<br>', 2) : _('Found %s sensors', count));
-                    });
+                    }
+
+                    onChange();
+                });
+            }
+        }
+
+        // the function loadSettings has to exist ...
+        function load(settings, onChange) {
+            if (!settings) return;
+
+            wires = settings.wires || [];
+
+            // id is reserved word
+            for (var t = 0; t < wires.length; t++) {
+                wires[t].id_ = wires[t].id;
+                delete wires[t].id;
+            }
+
+            if (!settings.path) settings.path = '/mnt/1wire';
+            if (settings.local === undefined) settings.local = false;
+
+            for (var key in settings) {
+                if (key === 'wires') continue;
+                setValue(key, settings[key], onChange);
+            }
+            $('#local').change(function () {
+                if ($(this).prop('checked')) {
+                    $('.server').hide();
+                    $('.local').show();
                 } else {
-                    showMessage(_('Start or enable adapter first'));
+                    $('.local').hide();
+                    $('.server').show();
+                }
+            }).trigger('change');
+
+            editTable('wires', ['name', 'id_', 'property'], wires, 470);
+
+            $('#readdirs').button({
+                icons: {
+                    primary: 'ui-icon-refresh'
+                }
+            }).click(function () {
+                getIsAdapterAlive(function (isAlive) {
+                    if (isAlive) {
+                        $('#readdirs').button('option', 'disabled', false);
+                        var config;
+                        if ($('#local').prop('checked')) {
+                            config = {
+                                path:     $('#path').val()
+                            };
+                        } else {
+                            config = {
+                                ip:     $('#ip').val(),
+                                port:   $('#port').val()
+                            };
+                        }
+
+                        sendTo(null, 'readdir', {
+                            config: config
+                        }, function (response) {
+                            $('#readdirs').button('option', 'disabled', false);
+                            wires = getTableResult('wires', ['name', 'id_', 'property']);
+                            if (response.sensors) {
+                                var count = 0;
+                                for (var sensor in response.sensors) {
+                                    var found = false;
+                                    var attrs = [];
+                                    for (var attr = 0; attr < response.sensors[sensor].length; attr++) {
+                                        if (possibleProperties.indexOf(response.sensors[sensor][attr]) !== -1) attrs.push(response.sensors[sensor][attr]);
+                                    }
+
+                                    for (var j = 0; j < wires.length; j++) {
+                                        if (wires[j].id_ === sensor) {
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!found) {
+                                        //If sensor not yet included
+                                        for (var a = 0; a < attrs.length; a++) {
+                                            addToTable('wires', {name: getUniqueIndex(wires, 'Sensor') + '_' + attrs[a], id_: sensor, property: attrs[a]});
+                                            wires = getTableResult('wires', ['name', 'id_', 'property']);
+                                            onChange(true);
+                                        }
+                                    }
+                                    count++;
+                                }
+                            }
+                            showMessage(response.error ? JSON.stringify(response.error, '<br>', 2) : _('Found %s sensors', count));
+                        });
+                    } else {
+                        showMessage(_('Start or enable adapter first'));
+                    }
+                });
+            });
+
+            onChange(false);
+        }
+
+        // ... and the function save has to exist.
+        // you have to make sure the callback is called with the settings object as first param!
+        function save(callback) {
+            // example: select elements with class=value and build settings object
+            var obj = {};
+            $('.value').each(function () {
+                var $this = $(this);
+                if ($this.attr('type') === 'checkbox') {
+                    obj[$this.attr('id')] = $this.prop('checked');
+                } else {
+                    obj[$this.attr('id')] = $this.val();
                 }
             });
-        });
 
-        onChange(false);
-    }
-
-    // ... and the function save has to exist.
-    // you have to make sure the callback is called with the settings object as first param!
-    function save(callback) {
-        // example: select elements with class=value and build settings object
-        var obj = {};
-        $('.value').each(function () {
-            var $this = $(this);
-            if ($this.attr('type') === 'checkbox') {
-                obj[$this.attr('id')] = $this.prop('checked');
-            } else {
-                obj[$this.attr('id')] = $this.val();
+            // Get edited table
+            obj.wires = getTableResult('wires', ['name', 'id_', 'property']);
+            // id is reserved word
+            for (var t = 0; t < obj.wires.length; t++) {
+                obj.wires[t].id = obj.wires[t].id_;
+                delete obj.wires[t].id_;
             }
-        });
 
-        // Get edited table
-        obj.wires = getTableResult('wires', ['name', 'id_', 'property']);
-        // id is reserved word
-        for (var t = 0; t < obj.wires.length; t++) {
-            obj.wires[t].id = obj.wires[t].id_;
-            delete obj.wires[t].id_;
+            callback(obj);
         }
-
-        callback(obj);
-    }
-</script>
+    </script>
 </head>
 <body>
 <!-- you have to put your config page in a div with id adapter-container -->
@@ -281,10 +303,11 @@
 
     <h4 class="translate">OWFS server settings</h4>
     <table>
-        <tr><td class="translate">IP Address of OWFS Server:</td><td><input class="value" id="ip" type="input"/></td></tr>
-        <tr><td class="translate">Port of OWFS Server:</td><td><input class="value number" id="port" type="input " size="5"/></td></tr>
-        <tr><td class="translate">Timeout(ms):</td><td><input class="value number" id="timeout" type="input" size="6"/></td></tr>
-        <tr><td class="translate">Poll interval(sec):</td><td><input class="value number" id="interval" type="input" size="6"/></td></tr>
+        <tr><td><label class="translate" for="local">Use local OWFS:</label></td><td><input class="value" id="local" type="checkbox"/></td></tr>
+        <tr class="local"><td><label class="translate" for="path">Path to OWFS mount:</label></td><td><input class="value" id="path"/></td></tr>
+        <tr class="server"><td><label class="translate" for="ip">IP Address of OWFS Server:</label></td><td><input class="value" id="ip"/></td></tr>
+        <tr class="server"><td><label class="translate" for="port">Port of OWFS Server:</label></td><td><input class="value number" id="port" size="5"/></td></tr>
+        <tr><td><label class="translate" for="interval">Poll interval(sec):</label></td><td><input class="value number" id="interval" size="6"/></td></tr>
     </table>
     <h4 class="translate">Wires addresses</h4>
     <button class="translate" id="readdirs">Read addresses</button>
