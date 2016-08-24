@@ -145,6 +145,7 @@ function processMessage(msg) {
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
                             _client = null;
                         } else {
+                            adapter.log.debug('Result for list: ' + JSON.stringify(dirs));
                             for (var d = dirs.length - 1; d >= 0; d--) {
                                 if (!dirs[d] || dirs[d][0] !== '/') {
                                     dirs.splice(d, 1);
@@ -152,9 +153,11 @@ function processMessage(msg) {
                                     dirs[d] = dirs[d].substring(1);
                                 }
                             }
+                            adapter.log.debug('Result for list_: ' + JSON.stringify(dirs));
 
                             // read all sensors
                             readSensors(_client, dirs, null, function (result) {
+                                adapter.log.debug('Result for dir: ' + JSON.stringify(result));
                                 adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
                                 _client = null;
                             });
@@ -164,10 +167,6 @@ function processMessage(msg) {
                     var _path1wire =  msg.message.config ? msg.message.config.path || '/mnt/1wire' : '/mnt/1wire';
                     if (_path1wire[_path1wire.length - 1] === '/') _path1wire = _path1wire.substring(0, _path1wire.length - 1);
                     fs.readdir(_path1wire, function (err, dirs) {
-                        if (!dirs[d] || dirs[d].indexOf('.') === -1) {
-                            dirs.splice(d, 1);
-                        }
-
                         if (err) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);

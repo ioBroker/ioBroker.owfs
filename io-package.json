@@ -1,9 +1,9 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.3.0",
+    "version":                  "0.3.1",
     "news": {
-      "0.3.0": {
+      "0.3.1": {
         "en": "support of local OWFS via file system",
         "de": "Unterstützung von LokalOWFS mit Dateisystem",
         "ru": "Поддержка локальной OWFS через файловую систему"
