@@ -21,7 +21,7 @@ This adapter uses the owfs library from https://www.npmjs.com/package/owjs and a
 http://sourceforge.net/projects/owfs/
 
 ## Changelog
-### 0.3.1 (2016-08-23)
+### 0.3.2 (2016-08-24)
 * (bluefox) support of local OWFS via file system
 
 ### 0.2.2 (2016-07-29)

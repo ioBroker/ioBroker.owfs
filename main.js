@@ -164,6 +164,7 @@ function processMessage(msg) {
                         }
                     });
                 } else {
+					fs = fs || require('fs');
                     var _path1wire =  msg.message.config ? msg.message.config.path || '/mnt/1wire' : '/mnt/1wire';
                     if (_path1wire[_path1wire.length - 1] === '/') _path1wire = _path1wire.substring(0, _path1wire.length - 1);
                     fs.readdir(_path1wire, function (err, dirs) {
@@ -171,6 +172,12 @@ function processMessage(msg) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
                         } else {
+							for (var d = dirs.length - 1; d >= 0; d--) {
+                                if (!dirs[d] || (dirs[d].indexOf('.') === -1 && dirs[d].indexOf('-') === -1)) {
+                                    dirs.splice(d, 1);
+                                }
+                            }
+							
                             // read all sensors
                             readSensors(_path1wire, dirs, null, function (result) {
                                 adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
