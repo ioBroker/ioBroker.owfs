@@ -15,10 +15,11 @@ var adapter = utils.adapter('owfs');
 var OWJS    = null;
 var fs      = null;
 
-var timer   = null;
+var timers  = {};
 var client  = null;
 var objects = {};
 var path1wire;
+var OW_DIRALL = 7; // list 1-wire bus, in one packet string // workaround for owserver
 
 adapter.on('message', function (obj) {
     if (obj) processMessage(obj);
@@ -30,9 +31,9 @@ adapter.on('ready', function () {
 });
 
 adapter.on('unload', function () {
-    if (timer) {
-        clearInterval(timer);
-        timer = 0;
+    for (var t in timers) {
+        clearInterval(timers[t].timer);
+        timers[t].timer = null;
     }
 });
 
@@ -123,7 +124,6 @@ var possibleSubTrees = [
     'set_alarm'
 ];
 
-
 function processMessage(msg) {
     if (!msg || !msg.command) return;
 
@@ -133,7 +133,7 @@ function processMessage(msg) {
                 var _client = null;
                 if (msg.message.config && msg.message.config.ip) {
                     adapter.log.debug('Connect to ' + msg.message.config.ip + ':' + msg.message.config.port);
-                    _client = new OWJS.Client({host: msg.message.config.ip, port: msg.message.config.port});
+                    _client = getOWFSClient({host: msg.message.config.ip, port: msg.message.config.port});
                 } else if (msg.message.config && !msg.message.config.path) {
                     _client = client;
                 }
@@ -270,9 +270,44 @@ function writeWire(wire, value) {
     }
 }
 
+function getOWFSClient(settings) {
+    OWJS = OWJS || require('owjs');
+    client = new OWJS.Client(settings);
+
+    client.list = function (path, callback) {
+        this.send(path, null, OW_DIRALL).then(function (messages) {
+            var ret;
+            var str;
+            for (var m = 0; m < messages.length; m++) {
+                ret = messages[m].header.ret;
+                if (messages[m].payload > 0 && messages[m].header && messages[m].header.ret >= 0) {
+                    str = messages[m].payload;
+                    break;
+                }
+            }
+            if (ret < 0) {
+                adapter.log.warn('Invalid response for list: ' + ret);
+                callback('Invalid response');
+                return;
+            }
+            if (!str) {
+                adapter.log.warn('Invalid response for list [empty answer]: ' + JSON.stringify(messages));
+                callback('Invalid response for list [empty answer]');
+                return;
+            }
+            str = str.substring(0, str.length - 1); // remove zero-char from end
+            callback(null, str.split(','));
+        }, function (error) {
+            callback(error);
+        });
+    };
+    return client;
+}
+
 function readWire(wire) {
     if (wire) {
         if (client) {
+            adapter.log.debug('Read ' + '/' + wire.id + '/' + (wire.property || 'temperature'));
             client.read('/' + wire.id + '/' + (wire.property || 'temperature'), function(err, result) {
                 result.value = result.value || '0';
                 result.value = result.value.trim();
@@ -298,6 +333,7 @@ function readWire(wire) {
         } else {
             var pathfile = path1wire + '/' + wire.id + '/' + (wire.property || 'temperature');
             // Read from file
+            adapter.log.debug('Read ' + pathfile);
             fs.readFile(pathfile, function (err, result) {
                 if (!err) {
                     result = result.toString();
@@ -323,11 +359,22 @@ function readWire(wire) {
     }
 }
 
-function pollAll() {
+function pollAll(intervalMs) {
     if (!adapter.config.wires) return;
-    for (var i = 0; i < adapter.config.wires.length; i++) {
-        if (adapter.config.wires[i]) readWire(adapter.config.wires[i]);
+
+    if (!intervalMs) {
+        for (var i = 0; i < adapter.config.wires.length; i++) {
+            if (adapter.config.wires[i]) readWire(adapter.config.wires[i]);
+        }
+    } else if (timers[intervalMs]) {
+        var intPorts = timers[intervalMs].ports;
+        for (var j = 0; j < intPorts.length; j++) {
+            readWire(adapter.config.wires[intPorts[j]]);
+        }
+    } else {
+        adapter.log.error('Strange: interval started, but no one ports found for that');
     }
+
 }
 
 function createState(wire, callback) {
@@ -462,8 +509,7 @@ function main() {
     }
 
     if (!adapter.config.local) {
-        OWJS = require('owjs');
-        client = new OWJS.Client({host: adapter.config.ip, port: adapter.config.port});
+        client = getOWFSClient({host: adapter.config.ip, port: adapter.config.port});
     } else {
         fs = require('fs');
         path1wire = adapter.config.path || '/mnt/1wire';
@@ -471,9 +517,29 @@ function main() {
     }
 
     syncConfig();
+    if (!adapter.config.wires) return;
 
     pollAll();
-    timer = setInterval(pollAll, adapter.config.interval * 1000);
+    for (var i = 0; i < adapter.config.wires.length; i++) {
+        if (!adapter.config.wires[i]) continue;
+        if (!adapter.config.wires[i].interval) {
+            adapter.config.wires[i].interval = adapter.config.interval * 1000;
+        } else {
+            adapter.config.wires[i].interval *= 1000;
+            if (!adapter.config.wires[i].interval) adapter.config.wires[i].interval = adapter.config.interval * 1000;
+        }
+        // If interval yet exists, just add to list
+        if (timers[adapter.config.wires[i].interval]) {
+            timers[adapter.config.wires[i].interval].ports.push(i);
+            continue;
+        }
+        // start new interval
+        timers[adapter.config.wires[i].interval] = {
+            timer: setInterval(pollAll, adapter.config.wires[i].interval, adapter.config.wires[i].interval),
+            ports: [i]
+        };
+    }
+
     adapter.subscribeStates('*');
 }
 

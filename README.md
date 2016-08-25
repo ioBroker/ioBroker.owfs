@@ -21,6 +21,9 @@ This adapter uses the owfs library from https://www.npmjs.com/package/owjs and a
 http://sourceforge.net/projects/owfs/
 
 ## Changelog
+### 0.3.3 (2016-08-25)
+* (bluefox) custom poll interval for every sensor
+
 ### 0.3.2 (2016-08-24)
 * (bluefox) support of local OWFS via file system
 

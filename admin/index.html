@@ -34,11 +34,12 @@
             "OWFS server settings":     {"en": "OWFS server settings",          "de": "OWFS Server Einstellungen",      "ru": "Настройки сервера OWFS"},
             "IP Address of OWFS Server:": {"en": "IP Address of OWFS Server:",  "de": "IP Adresse vom OWFS-Server:",    "ru": "IP адрес OWFS сервера:"},
             "Port of OWFS Server:":     {"en": "Port of OWFS Server:",          "de": "Port vom OWFS-Server:",          "ru": "Порт OWFS сервера:"},
-            "Poll interval(sec):":      {"en": "Poll interval(sec):",           "de": "Poll Intervall(sek):",           "ru": "Интервал опроса (сек):"},
+            "Poll interval(sec):":      {"en": "Default poll interval(sec):",   "de": "Default Poll-Intervall(sek):",   "ru": "Интервал опроса по умолчанию(сек):"},
             "Wires addresses":          {"en": "Wires addresses",               "de": "Wires Addressen",                "ru": "Адреса сенсоров"},
             "Found %s sensors":         {"en": "Found %s sensors",              "de": "%s Sensoren gefunden",           "ru": "Найдено %s сенсор(a/ов)"},
             "name":                     {"en": "Name",                          "de": "Name",                           "ru": "Имя сенсора"},
             "id_":                      {"en": "Sensor ID",                     "de": "Sensor ID",                      "ru": "ID сенсора"},
+            "interval":                 {"en": "Poll interval(sec)",            "de": "Poll-Intervall(sek)",            "ru": "Интервал опроса(сек)"},
             "property":                 {"en": "property",                      "de": "property",                       "ru": "property"},
             "Read addresses":           {"en": "Read addresses",                "de": "Adressen lesen",                 "ru": "Поиск сенсоров"},
             "Use local OWFS:":          {"en": "Use local OWFS:",               "de": "Lokal OWFS:",                    "ru": "Локальный OWFS:"},
@@ -143,7 +144,6 @@
             return prefix + i;
         }
 
-
         function setValue(id, value, onChange) {
             // example: select elements with id=key and class=value and insert value
             if ($('#' + id + '.value').attr('type') == 'checkbox') {
@@ -183,6 +183,7 @@
             // id is reserved word
             for (var t = 0; t < wires.length; t++) {
                 wires[t].id_ = wires[t].id;
+                if (wires[t].interval === undefined) wires[t].interval = ''; // use default
                 delete wires[t].id;
             }
 
@@ -203,7 +204,7 @@
                 }
             }).trigger('change');
 
-            editTable('wires', ['name', 'id_', 'property'], wires, 470);
+            editTable('wires', ['name', 'id_', 'property', 'interval'], wires, 470);
 
             $('#readdirs').button({
                 icons: {
@@ -282,7 +283,7 @@
             });
 
             // Get edited table
-            obj.wires = getTableResult('wires', ['name', 'id_', 'property']);
+            obj.wires = getTableResult('wires', ['name', 'id_', 'property', 'interval']);
             // id is reserved word
             for (var t = 0; t < obj.wires.length; t++) {
                 obj.wires[t].id = obj.wires[t].id_;

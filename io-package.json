@@ -1,8 +1,13 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.3.2",
+    "version":                  "0.3.3",
     "news": {
+      "0.3.3": {
+        "en": "add custom interval for every sensor",
+        "de": "Intervalleinstellung für jeden Sensor",
+        "ru": "Настройка интервалов для каждого сенсора"
+      },
       "0.3.2": {
         "en": "support of local OWFS via file system",
         "de": "Unterstützung von LokalOWFS mit Dateisystem",
