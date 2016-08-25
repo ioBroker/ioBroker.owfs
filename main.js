@@ -279,7 +279,7 @@ function getOWFSClient(settings) {
             var ret;
             var str;
             for (var m = 0; m < messages.length; m++) {
-                ret = messages[m].header.ret;
+                ret = messages[m].header ? messages[m].header.ret : -100;
                 if (messages[m].header && messages[m].header.payload > 0 && messages[m].header.ret >= 0) {
                     str = messages[m].payload;
                     break;
