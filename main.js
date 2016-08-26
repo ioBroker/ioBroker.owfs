@@ -172,11 +172,11 @@ function processMessage(msg) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
                         } else {
-							for (var d = dirs.length - 1; d >= 0; d--) {
+							/*for (var d = dirs.length - 1; d >= 0; d--) {
                                 if (!dirs[d] || (dirs[d].indexOf('.') === -1 && dirs[d].indexOf('-') === -1)) {
                                     dirs.splice(d, 1);
                                 }
-                            }
+                            }*/
 							
                             // read all sensors
                             readSensors(_path1wire, dirs, null, function (result) {
