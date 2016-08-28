@@ -1,8 +1,13 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.3.3",
+    "version":                  "0.3.4",
     "news": {
+      "0.3.4": {
+        "en": "filter out service entries by list",
+        "de": "Serviceeinträge Ausfiltren bei Detektieren des Sensors",
+        "ru": "Не показывть сервисные названия при поиске сенсоров"
+      },
       "0.3.3": {
         "en": "add custom interval for every sensor",
         "de": "Intervalleinstellung für jeden Sensor",

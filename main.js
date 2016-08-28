@@ -124,6 +124,16 @@ var possibleSubTrees = [
     'set_alarm'
 ];
 
+var ignoreDevices = [
+    'alarm',
+    'structure',
+    'system',
+    'settings',
+    'uncached',
+    'simultaneous',
+    'statistics'
+];
+
 function processMessage(msg) {
     if (!msg || !msg.command) return;
 
@@ -152,6 +162,8 @@ function processMessage(msg) {
                                 } else {
                                     dirs[d] = dirs[d].substring(1);
                                 }
+                                // remove some constant entries
+                                if (ignoreDevices.indexOf(dirs[d]) !== -1 || dirs[d].match(/^bus\./)) dirs.splice(d, 1);
                             }
                             adapter.log.debug('Result for list_: ' + JSON.stringify(dirs));
 
@@ -172,12 +184,13 @@ function processMessage(msg) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
                         } else {
-							/*for (var d = dirs.length - 1; d >= 0; d--) {
-                                if (!dirs[d] || (dirs[d].indexOf('.') === -1 && dirs[d].indexOf('-') === -1)) {
+							for (var d = dirs.length - 1; d >= 0; d--) {
+                                // remove some constant entries
+                                if (!dirs[d] || ignoreDevices.indexOf(dirs[d]) !== -1 || dirs[d].match(/^bus\./)) {
                                     dirs.splice(d, 1);
                                 }
-                            }*/
-							
+                            }
+
                             // read all sensors
                             readSensors(_path1wire, dirs, null, function (result) {
                                 adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
