@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
     <script type="text/javascript" src="../../js/translate.js"></script>
     <script type="text/javascript" src="../../js/adapter-settings.js"></script>
+    <script type="text/javascript" src="words.js"></script>
 
     <style>
         .table_header {
@@ -29,28 +30,6 @@
     <!-- you have to define 2 functions in the global scope: -->
     <script type="text/javascript">
         var wires = [];
-        systemDictionary = {
-            "OWFS adapter settings":    {"en": "OWFS adapter settings",         "de": "OWFS Adapter-Einstellungen",     "ru": "Настройки драйвера OWFS"},
-            "OWFS server settings":     {"en": "OWFS server settings",          "de": "OWFS Server Einstellungen",      "ru": "Настройки сервера OWFS"},
-            "IP Address of OWFS Server:": {"en": "IP Address of OWFS Server:",  "de": "IP Adresse vom OWFS-Server:",    "ru": "IP адрес OWFS сервера:"},
-            "Port of OWFS Server:":     {"en": "Port of OWFS Server:",          "de": "Port vom OWFS-Server:",          "ru": "Порт OWFS сервера:"},
-            "Poll interval(sec):":      {"en": "Default poll interval(sec):",   "de": "Default Poll-Intervall(sek):",   "ru": "Интервал опроса по умолчанию(сек):"},
-            "Wires addresses":          {"en": "Wires addresses",               "de": "Wires Addressen",                "ru": "Адреса сенсоров"},
-            "Found %s sensors":         {"en": "Found %s sensors",              "de": "%s Sensoren gefunden",           "ru": "Найдено %s сенсор(a/ов)"},
-            "name":                     {"en": "Name",                          "de": "Name",                           "ru": "Имя сенсора"},
-            "id_":                      {"en": "Sensor ID",                     "de": "Sensor ID",                      "ru": "ID сенсора"},
-            "interval":                 {"en": "Poll interval(sec)",            "de": "Poll-Intervall(sek)",            "ru": "Интервал опроса(сек)"},
-            "property":                 {"en": "property",                      "de": "property",                       "ru": "property"},
-            "Read addresses":           {"en": "Read addresses",                "de": "Adressen lesen",                 "ru": "Поиск сенсоров"},
-            "Use local OWFS:":          {"en": "Use local OWFS:",               "de": "Lokal OWFS:",                    "ru": "Локальный OWFS:"},
-            "Path to OWFS mount:":      {"en": "Path to OWFS mount:",           "de": "Pfad zu OWFS-Mount:",            "ru": "Путь к OWFS точке монтирования:"},
-            "Ok":                       {"en": "Ok",                            "de": "Ok",                             "ru": "Ok"},
-            "Start or enable adapter first": {
-                "en": "Start or enable adapter OWFS first",
-                "de": "Adapter muss zuerst aktiviert werden OWFS",
-                "ru": "Сначала надо активировать драйвер OWFS"
-            }
-        };
 
         var possibleProperties = [
             'humidity',
@@ -145,13 +124,13 @@
         }
 
         function setValue(id, value, onChange) {
-            // example: select elements with id=key and class=value and insert value
-            if ($('#' + id + '.value').attr('type') == 'checkbox') {
-                $('#' + id + '.value').prop('checked', value).change(function() {
+            var $value = $('#' + id + '.value');
+            if ($value.attr('type') === 'checkbox') {
+                $value.prop('checked', value).change(function() {
                     onChange();
                 });
             } else {
-                $('#' + id + '.value').val(value).change(function() {
+                $value.val(value).change(function() {
                     onChange();
                 }).keyup(function() {
                     // Check that only numbers entered
@@ -191,7 +170,7 @@
             if (settings.local === undefined) settings.local = false;
 
             for (var key in settings) {
-                if (key === 'wires') continue;
+                if (!settings.hasOwnProperty(key) || key === 'wires') continue;
                 setValue(key, settings[key], onChange);
             }
             $('#local').change(function () {
@@ -204,7 +183,8 @@
                 }
             }).trigger('change');
 
-            editTable('wires', ['name', 'id_', 'property', 'interval'], wires, 470);
+            //editTable('wires', ['name', 'id_', 'property', 'interval'], wires, 470);
+            values2table('values', wires, onChange);
 
             $('#readdirs').button({
                 icons: {
@@ -230,10 +210,13 @@
                             config: config
                         }, function (response) {
                             $('#readdirs').button('option', 'disabled', false);
-                            wires = getTableResult('wires', ['name', 'id_', 'property']);
+                            wires = table2values('values');//getTableResult('wires', ['name', 'id_', 'property']);
+                            var changed = false;
                             if (response.sensors) {
                                 var count = 0;
                                 for (var sensor in response.sensors) {
+                                    if (!response.sensors.hasOwnProperty(sensor)) continue;
+
                                     var found = false;
                                     var attrs = [];
                                     for (var attr = 0; attr < response.sensors[sensor].length; attr++) {
@@ -249,13 +232,20 @@
                                     if (!found) {
                                         //If sensor not yet included
                                         for (var a = 0; a < attrs.length; a++) {
-                                            addToTable('wires', {name: getUniqueIndex(wires, 'Sensor') + '_' + attrs[a], id_: sensor, property: attrs[a]});
-                                            wires = getTableResult('wires', ['name', 'id_', 'property']);
-                                            onChange(true);
+                                            wires.push({
+                                                name:     getUniqueIndex(wires, 'Sensor') + '_' + attrs[a],
+                                                id_:      sensor,
+                                                property: attrs[a],
+                                                iButton:  false
+                                            });
                                         }
                                     }
                                     count++;
                                 }
+                            }
+                            if (changed) {
+                                values2table('values', wires, onChange);
+                                onChange();
                             }
                             showMessage(response.error ? JSON.stringify(response.error, '<br>', 2) : _('Found %s sensors', count));
                         });
@@ -268,10 +258,7 @@
             onChange(false);
         }
 
-        // ... and the function save has to exist.
-        // you have to make sure the callback is called with the settings object as first param!
         function save(callback) {
-            // example: select elements with class=value and build settings object
             var obj = {};
             $('.value').each(function () {
                 var $this = $(this);
@@ -283,19 +270,13 @@
             });
 
             // Get edited table
-            obj.wires = getTableResult('wires', ['name', 'id_', 'property', 'interval']);
-            // id is reserved word
-            for (var t = 0; t < obj.wires.length; t++) {
-                obj.wires[t].id = obj.wires[t].id_;
-                delete obj.wires[t].id_;
-            }
+            obj.wires = table2values('values');
 
             callback(obj);
         }
     </script>
 </head>
 <body>
-<!-- you have to put your config page in a div with id adapter-container -->
 <div id="adapter-container">
     <table><tr>
         <td><img src="owfs.png" width="64" height="64"></td>
@@ -304,15 +285,32 @@
 
     <h4 class="translate">OWFS server settings</h4>
     <table>
-        <tr><td><label class="translate" for="local">Use local OWFS:</label></td><td><input class="value" id="local" type="checkbox"/></td></tr>
-        <tr class="local"><td><label class="translate" for="path">Path to OWFS mount:</label></td><td><input class="value" id="path"/></td></tr>
-        <tr class="server"><td><label class="translate" for="ip">IP Address of OWFS Server:</label></td><td><input class="value" id="ip"/></td></tr>
-        <tr class="server"><td><label class="translate" for="port">Port of OWFS Server:</label></td><td><input class="value number" id="port" size="5"/></td></tr>
-        <tr><td><label class="translate" for="interval">Poll interval(sec):</label></td><td><input class="value number" id="interval" size="6"/></td></tr>
+        <tr><td><label class="translate" for="local">Use local OWFS:</label></td><td class="admin-icon"></td><td><input class="value" id="local" type="checkbox"/></td></tr>
+        <tr class="local"><td><label class="translate" for="path">Path to OWFS mount:</label></td><td class="admin-icon"></td><td><input class="value" id="path"/></td></tr>
+        <tr class="server"><td><label class="translate" for="ip">IP Address of OWFS Server:</label></td><td class="admin-icon"></td><td><input class="value" id="ip"/></td></tr>
+        <tr class="server"><td><label class="translate" for="port">Port of OWFS Server:</label></td><td class="admin-icon"></td><td><input class="value number" id="port" size="5"/></td></tr>
+        <tr><td><label class="translate" for="interval">Poll interval(sec):</label></td><td class="admin-icon"></td><td><input class="value number" id="interval" size="6"/></td></tr>
     </table>
     <h4 class="translate">Wires addresses</h4>
-    <button class="translate" id="readdirs">Read addresses</button>
-    <table id="wires"></table><div id="pager-wires"></div>
+    <div id="values" style="width: 100%; height: calc(100% - 280px)">
+        <button class="table-button-add" style="margin-left: 10px; width: 2em; height: 2em; display: inline-block"></button>
+        <button class="translate" id="readdirs" style="display: inline-block">Read addresses</button>
+        <div style="width: 100%; height: calc(100% - 30px); overflow: auto;">
+            <table class="table-values" style="width: 100%;">
+                <thead>
+                <tr>
+                    <th data-name="_index"   style="width: 40px" class="translate"></th>
+                    <th data-name="name"     style="width: 20%" class="translate">Name</th>
+                    <th data-name="id"       class="translate">ID</th>
+                    <th data-name="property" style="width: 120px" data-style="width: 120px" class="translate">Property</th>
+                    <th data-name="iButton"  style="width: 60px" data-type="checkbox" class="translate">iButton</th>
+                    <th data-name="interval" style="width: 60px" data-style="width: 60px" data-type="number" class="translate translateT" title="In seconds">Interval</th>
+                    <th data-buttons="delete" style="width: 40px"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
 </div>
 </body>
 </html>

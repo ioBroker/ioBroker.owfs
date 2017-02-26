@@ -327,20 +327,28 @@ function readWire(wire) {
                 adapter.log.debug('Read ' + result.path + ':' + result.value);
 
                 if (!err) {
-                    // ALL is like "0,1"
-                    if (wire.property.indexOf('.ALL') !== -1) {
-                        adapter.setState('wires.' + wire._name, result.value || '', true);
-                    } else
-                    // PIO.0, PIO.1, PIO.A are boolean    
-                    if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
-                        adapter.setState('wires.' + wire._name, (result.value == '1'), true);
+                    if (wire.iButton) {
+                        adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports error
                     } else {
-                        // alse some float value, e.g. temperature
-                        adapter.setState('wires.' + wire._name, parseFloat(result.value) || 0, true);
+                        // ALL is like "0,1"
+                        if (wire.property.indexOf('.ALL') !== -1) {
+                            adapter.setState('wires.' + wire._name, result.value || '', true);
+                        } else
+                        // PIO.0, PIO.1, PIO.A are boolean
+                        if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
+                            adapter.setState('wires.' + wire._name, (result.value == '1'), true);
+                        } else {
+                            // alse some float value, e.g. temperature
+                            adapter.setState('wires.' + wire._name, parseFloat(result.value) || 0, true);
+                        }
                     }
                 } else {
-                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
-                    adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
+                    if (wire.iButton) {
+                        adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
+                    } else {
+                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
+                    }
                 }
             });
         } else {
@@ -399,24 +407,30 @@ function createState(wire, callback) {
         role:       'value.' + (wire.property || 'temperature'),
         desc:       '1wire sensor'
     };
+    if (wire.iButton) {
+        obj.type  = 'boolean';
+        obj.write = false;
+        obj.role  = 'indicator';
+        obj.desc  = '1wire iButton'
+    } else {
+        if (obj.role === 'value.temperature') {
+            obj.role    = 'level.temperature';
+            obj.unit    = '°C';
+            obj.write   = false;
+        }
 
-    if (obj.role === 'value.temperature') {
-        obj.role    = 'level.temperature';
-        obj.unit    = '°C';
-        obj.write   = false;
-    }
+        if (obj.role === 'value.humidity') {
+            obj.role    = 'level.humidity';
+            obj.unit    = '%';
+            obj.min     = 0;
+            obj.max     = 100;
+            obj.write   = false;
+        }
 
-    if (obj.role === 'value.humidity') {
-        obj.role    = 'level.humidity';
-        obj.unit    = '%';
-        obj.min     = 0;
-        obj.max     = 100;
-        obj.write   = false;
-    }
-
-    if (wire.property.indexOf('PIO') !== -1) {
-        obj.type = 'boolean';
-        obj.role = 'switch';
+        if (wire.property.indexOf('PIO') !== -1) {
+            obj.type = 'boolean';
+            obj.role = 'switch';
+        }
     }
 
     adapter.createState('', 'wires', wire._name, obj, {

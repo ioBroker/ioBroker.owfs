@@ -1,8 +1,13 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.3.4",
+    "version":                  "0.4.0",
     "news": {
+      "0.4.0": {
+        "en": "support iButtons",
+        "de": "Unterstützung von iButtons",
+        "ru": "Поддержка iButtons"
+      },
       "0.3.4": {
         "en": "filter out service entries by list",
         "de": "Serviceeinträge Ausfiltren bei Detektieren des Sensors",
@@ -76,12 +81,14 @@
       {
         "name": "Sensor1",
         "id": "10.C8F148010800",
-        "property": "temperature"
+        "property": "temperature",
+        "iButton": false
       },
       {
         "name": "Sensor2",
         "id": "10.040349010801",
-        "property": "temperature"
+        "property": "temperature",
+        "iButton": false
       }
     ]
   },

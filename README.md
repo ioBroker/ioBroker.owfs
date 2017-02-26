@@ -21,6 +21,9 @@ This adapter uses the owfs library from https://www.npmjs.com/package/owjs and a
 http://sourceforge.net/projects/owfs/
 
 ## Changelog
+### 0.4.0 (2017-02-26)
+* (bluefox) support iButtons
+
 ### 0.3.4 (2016-08-28)
 * (bluefox) filter out service entries by list
 
