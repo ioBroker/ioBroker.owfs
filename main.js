@@ -318,6 +318,7 @@ function getOWFSClient(settings) {
 }
 
 function readWire(wire) {
+    if (wire.iButton && !wire.property) wire.property = 'r_address';
     if (wire) {
         if (client) {
             adapter.log.debug('Read ' + '/' + wire.id + '/' + (wire.property || 'temperature'));
