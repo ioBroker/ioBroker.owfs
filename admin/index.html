@@ -161,9 +161,7 @@
 
             // id is reserved word
             for (var t = 0; t < wires.length; t++) {
-                wires[t].id_ = wires[t].id;
                 if (wires[t].interval === undefined) wires[t].interval = ''; // use default
-                delete wires[t].id;
             }
 
             if (!settings.path) settings.path = '/mnt/1wire';

@@ -28,5 +28,10 @@ systemDictionary = {
         "en": "Activate it if 1-wire runs on the same system. It is faster and do not require TCP server.",
         "de": "Aktivieren Sie diese option, falls 1-wire läuft auf dem gleichen System. Es ist schneller und TCP Server ist nicht nötig",
         "ru": "Включите эту опцию, если 1-wire работает в той же системе, что и ioBroker. Это быстрее и не трубует работающего TCP сервера."
+    },
+    "tooltip_path": {
+        "en": "Path to the OWFS directory like '/mnt/1wire'",
+        "de": "Pfad zu OWFS Verzeichnis, wie '/mnt/1wire'",
+        "ru": "Путь к папке OWFS, как '/mnt/1wire'"
     }
 };

@@ -322,13 +322,15 @@ function readWire(wire) {
         if (client) {
             adapter.log.debug('Read ' + '/' + wire.id + '/' + (wire.property || 'temperature'));
             client.read('/' + wire.id + '/' + (wire.property || 'temperature'), function(err, result) {
-                result.value = result.value || '0';
-                result.value = result.value.trim();
-                adapter.log.debug('Read ' + result.path + ':' + result.value);
+                if (result) {
+                    result.value = result.value || '0';
+                    result.value = result.value.trim();
+                    adapter.log.debug('Read ' + result.path + ':' + result.value);
+                }
 
-                if (!err) {
+                if (!err && result) {
                     if (wire.iButton) {
-                        adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports error
+                        adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports OK
                     } else {
                         // ALL is like "0,1"
                         if (wire.property.indexOf('.ALL') !== -1) {
@@ -356,24 +358,32 @@ function readWire(wire) {
             // Read from file
             adapter.log.debug('Read ' + pathfile);
             fs.readFile(pathfile, function (err, result) {
-                if (!err) {
+                if (!err && result) {
                     result = result.toString();
                     adapter.log.debug('Read ' + pathfile + ': ' + result);
 
-                    // ALL is like "0,1"
-                    if (wire.property.indexOf('.ALL') !== -1) {
-                        adapter.setState('wires.' + wire._name, result || '', true);
-                    } else
-                    // PIO.0, PIO.1, PIO.A are boolean    
-                    if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
-                        adapter.setState('wires.' + wire._name, (result == '1'), true);
+                    if (wire.iButton) {
+                        adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports OK
                     } else {
-                        // alse some float value, e.g. temperature
-                        adapter.setState('wires.' + wire._name, parseFloat(result) || 0, true);
+                        // ALL is like "0,1"
+                        if (wire.property.indexOf('.ALL') !== -1) {
+                            adapter.setState('wires.' + wire._name, result || '', true);
+                        } else
+                        // PIO.0, PIO.1, PIO.A are boolean
+                        if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
+                            adapter.setState('wires.' + wire._name, (result == '1'), true);
+                        } else {
+                            // alse some float value, e.g. temperature
+                            adapter.setState('wires.' + wire._name, parseFloat(result) || 0, true);
+                        }
                     }
                 } else {
-                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
-                    adapter.log.warn('Cannot read value of ' + pathfile + ': ' + err);
+                    if (wire.iButton) {
+                        adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
+                    } else {
+                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        adapter.log.warn('Cannot read value of ' + pathfile + ': ' + err);
+                    }
                 }
             });
         }
