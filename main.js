@@ -334,14 +334,14 @@ function readWire(wire) {
                     } else {
                         // ALL is like "0,1"
                         if (wire.property.indexOf('.ALL') !== -1) {
-                            adapter.setState('wires.' + wire._name, result.value || '', true);
+                            adapter.setState('wires.' + wire._name, {val: result.value || '', ack: true, q: 0});
                         } else
                         // PIO.0, PIO.1, PIO.A are boolean
                         if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
-                            adapter.setState('wires.' + wire._name, (result.value == '1'), true);
+                            adapter.setState('wires.' + wire._name, {val: (result.value == '1'), ack: true, q: 0});
                         } else {
                             // alse some float value, e.g. temperature
-                            adapter.setState('wires.' + wire._name, parseFloat(result.value) || 0, true);
+                            adapter.setState('wires.' + wire._name, {val: parseFloat(result.value) || 0, ack: true, q: 0});
                         }
                     }
                 } else {
@@ -367,14 +367,14 @@ function readWire(wire) {
                     } else {
                         // ALL is like "0,1"
                         if (wire.property.indexOf('.ALL') !== -1) {
-                            adapter.setState('wires.' + wire._name, result || '', true);
+                            adapter.setState('wires.' + wire._name, {val: result || '', ack: true, q: 0});
                         } else
                         // PIO.0, PIO.1, PIO.A are boolean
                         if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
-                            adapter.setState('wires.' + wire._name, (result == '1'), true);
+                            adapter.setState('wires.' + wire._name, {val: (result == '1'), ack: true, q: 0});
                         } else {
                             // alse some float value, e.g. temperature
-                            adapter.setState('wires.' + wire._name, parseFloat(result) || 0, true);
+                            adapter.setState('wires.' + wire._name, {val: parseFloat(result) || 0, ack: true, q: 0});
                         }
                     }
                 } else {
