@@ -1,13 +1,18 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.4.0",
+    "version":                  "0.4.1",
     "news": {
-      "0.4.0": {
-        "en": "support iButtons",
-        "de": "Unterstützung von iButtons",
-        "ru": "Поддержка iButtons"
-      },
+        "0.4.1": {
+          "en": "fix translation",
+          "de": "Übersetzung verbessert",
+          "ru": "fix translation"
+        },
+        "0.4.0": {
+          "en": "support iButtons",
+          "de": "Unterstützung von iButtons",
+          "ru": "Поддержка iButtons"
+        },
       "0.3.4": {
         "en": "filter out service entries by list",
         "de": "Serviceeinträge Ausfiltren bei Detektieren des Sensors",
