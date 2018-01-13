@@ -1,5 +1,5 @@
 ![Logo](admin/owfs.png)
-ioBroker OWFS Adapter
+#ioBroker OWFS Adapter
 ==============
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.owfs.svg)](https://www.npmjs.com/package/iobroker.owfs)
@@ -8,14 +8,33 @@ ioBroker OWFS Adapter
 [![NPM](https://nodei.co/npm/iobroker.owfs.png?downloads=true)](https://nodei.co/npm/iobroker.owfs/)
 
 
-# *One wire file system* adapter for ioBroker.
+## *One wire file system* adapter for ioBroker.
 
 Supported
 
 This adapter uses the owfs library from https://www.npmjs.com/package/owjs and accordingly requires owfs server.
 
 ## Install OWFS Linux
+
 ```sudo apt-get install owfs```
+
+Sometimes you need write following steps:
+- To start the the server to communicate over serial interface with 1wire sensors 
+
+```
+owserver -d "/dev/ttyUSB0" --nozero
+```
+
+*/dev/ttyUSB0* is the name of your serial device. Here was USB stick used for that.
+
+This command starts the 1wire server on local port 4304.
+
+- To show the data from the local 1wire server in the file system call follwing command: 
+
+```
+owfs -C -m /mnt/1wire --allow_other
+```
+Before you must create the directroy */mnt/1wire* with command `mkdir /mnt/1wire`
 
 ## Install OWFS windows
 http://sourceforge.net/projects/owfs/
