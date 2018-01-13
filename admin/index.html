@@ -222,7 +222,7 @@
                                     }
 
                                     for (var j = 0; j < wires.length; j++) {
-                                        if (wires[j].id_ === sensor) {
+                                        if (wires[j].id_ === sensor || wires[j].id === sensor) {
                                             found = true;
                                             break;
                                         }
@@ -237,6 +237,7 @@
                                                 iButton:  false
                                             });
                                         }
+                                        changed = true;
                                     }
                                     count++;
                                 }
