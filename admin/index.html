@@ -222,7 +222,7 @@
                                     }
 
                                     for (var j = 0; j < wires.length; j++) {
-                                        if (wires[j].id_ === sensor || wires[j].id === sensor) {
+                                        if (wires[j].id === sensor) {
                                             found = true;
                                             break;
                                         }
@@ -232,7 +232,7 @@
                                         for (var a = 0; a < attrs.length; a++) {
                                             wires.push({
                                                 name:     getUniqueIndex(wires, 'Sensor') + '_' + attrs[a],
-                                                id_:      sensor,
+                                                id:      sensor,
                                                 property: attrs[a],
                                                 iButton:  false
                                             });
