@@ -40,6 +40,9 @@ Before you must create the directroy */mnt/1wire* with command `mkdir /mnt/1wire
 http://sourceforge.net/projects/owfs/
 
 ## Changelog
+### 0.5.0 (2018-03-16)
+* (bluefox) Ready for Admin3
+
 ### 0.4.1 (2017-05-29)
 * (ausHaus) fix translations
 
@@ -87,7 +90,7 @@ http://sourceforge.net/projects/owfs/
 
 The MIT License (MIT)
 
-Copyright (c) 2015, bluefox
+Copyright (c) 2015-2018, bluefox
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

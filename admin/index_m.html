@@ -1,0 +1,311 @@
+<html>
+<head>
+    <!-- Materialze style -->
+    <link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+    <link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+
+    <script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+
+    <script type="text/javascript" src="../../js/translate.js"></script>
+    <script type="text/javascript" src="../../lib/js/materialize.js"></script>
+    <script type="text/javascript" src="../../js/adapter-settings.js"></script>
+    <script type="text/javascript" src="words.js"></script>
+
+<script type="text/javascript">
+    var wires = [];
+
+    var possibleProperties = [
+        'humidity',
+        'pressure',
+        'inHg',
+        'vib_level',
+        'vib_peak',
+        'vib_min',
+        'vib_max',
+        'current.0',
+        'current.1',
+        'current.2',
+        'current.ALL',
+        'min_current.0',
+        'min_current.1',
+        'min_current.2',
+        'min_current.ALL',
+        'max_current.0',
+        'max_current.1',
+        'max_current.2',
+        'max_current.ALL',
+        'volts.0',
+        'volts.1',
+        'volts.2',
+        'volts.ALL',
+        'min_volts.0',
+        'min_volts.1',
+        'min_volts.2',
+        'min_volts.ALL',
+        'max_volts.0',
+        'max_volts.1',
+        'max_volts.2',
+        'max_volts.ALL',
+        'gain',
+        'offset',
+        'current',
+        'illuminance',
+        'relay/state',
+        'relay/control',
+        'LED/state',
+        'LED/control',
+        'resistance',
+        'dew_point',
+        'heat_index',
+        'humidex',
+        'light',
+        'temperature',
+        'fasttemp',
+        'set_alarm',
+        'date',
+        'PIO',
+        'PIO.A',
+        'PIO.B',
+        'PIO.0',
+        'PIO.1',
+        'PIO.2',
+        'PIO.3',
+        'PIO.4',
+        'PIO.5',
+        'PIO.6',
+        'PIO.7',
+        'PIO.ALL',
+        'PIO.BYTE',
+        'latch.0',
+        'latch.1',
+        'latch.2',
+        'latch.3',
+        'latch.4',
+        'latch.5',
+        'latch.6',
+        'latch.7',
+        'latch.ALL',
+        'latch.BYTE',
+        'sensed.BYTE'
+    ];
+
+    function getUniqueIndex(_wires, prefix) {
+        var i = 1;
+        var found;
+        do {
+            found = false;
+            for (var w = 0; w < _wires.length; w++) {
+                if (_wires[w].name.substring(0, (prefix + i).length) === prefix + i) {
+                    found = true;
+                    i++;
+                    break;
+                }
+            }
+        } while (found);
+
+        return prefix + i;
+    }
+
+    function setValue(id, value, onChange) {
+        var $value = $('#' + id + '.value');
+        if ($value.attr('type') === 'checkbox') {
+            $value.prop('checked', value).on('change', function() {
+                onChange();
+            });
+        } else {
+            $value.val(value).on('change', function() {
+                onChange();
+            }).on('keyup', function() {
+                onChange();
+            });
+        }
+    }
+
+    // the function loadSettings has to exist ...
+    function load(settings, onChange) {
+        if (!settings) return;
+
+        wires = settings.wires || [];
+
+        // id is reserved word
+        for (var t = 0; t < wires.length; t++) {
+            if (wires[t].interval === undefined) wires[t].interval = ''; // use default
+        }
+
+        if (!settings.path) settings.path = '/mnt/1wire';
+        if (settings.local === undefined) settings.local = false;
+
+        for (var key in settings) {
+            if (!settings.hasOwnProperty(key) || key === 'wires') continue;
+            setValue(key, settings[key], onChange);
+        }
+        $('#local').on('change', function () {
+            if ($(this).prop('checked')) {
+                $('.server').hide();
+                $('.local').show();
+            } else {
+                $('.local').hide();
+                $('.server').show();
+            }
+        }).trigger('change');
+
+        //editTable('wires', ['name', 'id_', 'property', 'interval'], wires, 470);
+        values2table('values', wires, onChange);
+
+        $('#readdirs').on('click', function () {
+            $('#readdirs').addClass('disabled');
+
+            getIsAdapterAlive(function (isAlive) {
+                if (isAlive) {
+                    var config;
+                    if ($('#local').prop('checked')) {
+                        config = {
+                            path:     $('#path').val()
+                        };
+                    } else {
+                        config = {
+                            ip:     $('#ip').val(),
+                            port:   $('#port').val()
+                        };
+                    }
+
+                    sendTo(null, 'readdir', {config: config}, function (response) {
+                        $('#readdirs').removeClass('disabled');
+                        wires = table2values('values');//getTableResult('wires', ['name', 'id_', 'property']);
+
+                        var changed = false;
+                        if (response.sensors) {
+                            var count = 0;
+                            for (var sensor in response.sensors) {
+                                if (!response.sensors.hasOwnProperty(sensor)) continue;
+
+                                var found = false;
+                                var attrs = [];
+                                for (var attr = 0; attr < response.sensors[sensor].length; attr++) {
+                                    if (possibleProperties.indexOf(response.sensors[sensor][attr]) !== -1) attrs.push(response.sensors[sensor][attr]);
+                                }
+
+                                for (var j = 0; j < wires.length; j++) {
+                                    if (wires[j].id === sensor) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    //If sensor not yet included
+                                    for (var a = 0; a < attrs.length; a++) {
+                                        wires.push({
+                                            name:     getUniqueIndex(wires, 'Sensor') + '_' + attrs[a],
+                                            id:      sensor,
+                                            property: attrs[a],
+                                            iButton:  false
+                                        });
+                                    }
+                                    changed = true;
+                                }
+                                count++;
+                            }
+                        }
+                        if (changed) {
+                            values2table('values', wires, onChange);
+                            onChange();
+                        }
+                        showMessage(response.error ? JSON.stringify(response.error, '<br>', 2) : _('Found %s sensors', count));
+                    });
+                } else {
+                    showMessage(_('Start or enable adapter first'));
+                }
+            });
+        });
+
+        onChange(false);
+    }
+
+    function save(callback) {
+        var obj = {};
+        $('.value').each(function () {
+            var $this = $(this);
+            if ($this.attr('type') === 'checkbox') {
+                obj[$this.attr('id')] = $this.prop('checked');
+            } else {
+                obj[$this.attr('id')] = $this.val();
+            }
+        });
+
+        // Get edited table
+        obj.wires = table2values('values');
+
+        callback(obj);
+    }
+</script>
+</head>
+<body>
+<div class="m adapter-container">
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs">
+                <li class="tab col s2"><a href="#tab-main"    class="translate active">OWFS server settings</a></li>
+                <li class="tab col s2"><a href="#tab-devices" class="translate">Wires addresses</a></li>
+            </ul>
+        </div>
+        <div id="tab-main"    class="col s12 page">
+            <div class="row">
+                <div class="col s12 m4 l2">
+                    <img src="owfs.png" class="logo">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m4">
+                    <input class="value" id="local" type="checkbox"/>
+                    <label class="translate" for="local">Use local OWFS:</label>
+                </div>
+            </div>
+            <div class="row local">
+                <div class="col s12 m4">
+                    <input class="value" id="path"/>
+                    <label class="translate" for="path">Path to OWFS mount:</label>
+                </div>
+            </div>
+            <div class="row server">
+                <div class="col s12 m4">
+                    <input class="value" id="ip"/>
+                    <label class="translate" for="ip">IP Address of OWFS Server:</label>
+                </div>
+                <div class="col s12 m4">
+                    <input class="value" id="port" type="number" min="1" max="65565"/>
+                    <label class="translate" for="port">Port of OWFS Server:</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m4">
+                    <input class="value" id="interval" min="0" max="100000"/>
+                    <label class="translate" for="interval">Poll interval(sec):</label>
+                </div>
+            </div>
+        </div>
+        <div id="tab-devices" class="col s12 page">
+            <div class="col s12" id="values">
+                <a class="btn-floating waves-effect waves-light blue table-button-add"><i class="material-icons">add</i></a>
+                <a class="btn-floating waves-effect waves-light blue translateT" title="Read addresses" id="readdirs"><i class="material-icons">refresh</i></a>
+                <div class="table-values-div">
+                    <table class="table-values">
+                        <thead>
+                        <tr>
+                            <th data-name="_index"   style="width: 40px" class="translate"></th>
+                            <th data-name="name"     style="width: 20%" class="translate">Name</th>
+                            <th data-name="id"       class="translate">ID</th>
+                            <th data-name="property" style="width: 120px" data-style="width: 120px" class="translate">Property</th>
+                            <th data-name="iButton"  style="width: 60px" data-type="checkbox" class="translate">iButton</th>
+                            <th data-name="interval" style="width: 60px" data-style="width: 60px" data-type="number" class="translate translateT" title="In seconds">Interval</th>
+                            <th data-buttons="delete" style="width: 40px"></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

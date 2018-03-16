@@ -126,13 +126,13 @@
         function setValue(id, value, onChange) {
             var $value = $('#' + id + '.value');
             if ($value.attr('type') === 'checkbox') {
-                $value.prop('checked', value).change(function() {
+                $value.prop('checked', value).on('change', function() {
                     onChange();
                 });
             } else {
-                $value.val(value).change(function() {
+                $value.val(value).on('change', function() {
                     onChange();
-                }).keyup(function() {
+                }).on('keyup', function() {
                     // Check that only numbers entered
                     if ($(this).hasClass('number')) {
                         var val = $(this).val();
@@ -171,7 +171,7 @@
                 if (!settings.hasOwnProperty(key) || key === 'wires') continue;
                 setValue(key, settings[key], onChange);
             }
-            $('#local').change(function () {
+            $('#local').on('change', function () {
                 if ($(this).prop('checked')) {
                     $('.server').hide();
                     $('.local').show();
@@ -188,7 +188,7 @@
                 icons: {
                     primary: 'ui-icon-refresh'
                 }
-            }).click(function () {
+            }).on('click', function () {
                 getIsAdapterAlive(function (isAlive) {
                     if (isAlive) {
                         $('#readdirs').button('option', 'disabled', false);

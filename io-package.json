@@ -1,18 +1,29 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.4.1",
+    "version":                  "0.5.0",
     "news": {
-        "0.4.1": {
-          "en": "fix translation",
-          "de": "Übersetzung verbessert",
-          "ru": "fix translation"
-        },
-        "0.4.0": {
-          "en": "support iButtons",
-          "de": "Unterstützung von iButtons",
-          "ru": "Поддержка iButtons"
-        },
+      "0.5.0": {
+        "en": "Ready for Admin3",
+        "de": "Bereit für Admin3",
+        "ru": "Готово для администратора3",
+        "pt": "Pronto para Admin3",
+        "nl": "Klaar voor Admin3",
+        "fr": "Prêt pour Admin3",
+        "it": "Pronto per Admin3",
+        "es": "Listo para Admin3",
+        "pl": "Gotowy na administratora3"
+      },
+      "0.4.1": {
+        "en": "fix translation",
+        "de": "Übersetzung verbessert",
+        "ru": "fix translation"
+      },
+      "0.4.0": {
+        "en": "support iButtons",
+        "de": "Unterstützung von iButtons",
+        "ru": "Поддержка iButtons"
+      },
       "0.3.4": {
         "en": "filter out service entries by list",
         "de": "Serviceeinträge Ausfiltren bei Detektieren des Sensors",
@@ -54,11 +65,17 @@
         "ru": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes"
       }
     },
-    "title":                    "OWFS Adapter",
+    "title":                    "1Wire OWFS",
     "desc":                     {
-      "en": "One wire file system adapter for ioBroker.",
-      "de": "'One wire file system' Adapter für ioBroker",
-      "ru": "'One wire file system' драйвер для ioBroker"
+      "en": "Allows to read 1wire sensors",
+      "de": "Ermöglicht das Lesen von 1-Draht-Sensoren",
+      "ru": "Позволяет читать 1-проводные датчики",
+      "pt": "Permite ler sensores de 1 fio",
+      "nl": "Maakt het mogelijk om 1wire-sensoren te lezen",
+      "fr": "Permet de lire les capteurs 1wire",
+      "it": "Permette di leggere i sensori 1wire",
+      "es": "Permite leer 1 sensores de cable",
+      "pl": "Umożliwia odczyt 1 czujników przewodowych"
     },
     "authors": [
       "bluefox <dogafox@gmail.com>"
@@ -72,6 +89,7 @@
     "icon":                     "owfs.png",
     "messagebox":               true,
     "subscribe":                "messagebox",
+    "materialize":              true,
     "keywords":                 ["owfs", "one wire", "1wire"],
     "extIcon":                  "https://raw.githubusercontent.com/ioBroker/ioBroker.owfs/master/admin/owfs.png",
     "type":                     "hardware"
