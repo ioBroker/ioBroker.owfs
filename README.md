@@ -2,7 +2,7 @@
 # ioBroker OWFS Adapter
 ==============
 
-[![NPM version](http://img.shields.io/npm/v/iobroker.owfs.svg)](https://www.npmjs.com/package/iobroker.owfs)
+![Number of Installations](http://iobroker.live/badges/owfs-installed.svg) ![Number of Installations](http://iobroker.live/badges/owfs-stable.svg) [![NPM version](http://img.shields.io/npm/v/iobroker.owfs.svg)](https://www.npmjs.com/package/iobroker.owfs)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.owfs.svg)](https://www.npmjs.com/package/iobroker.owfs)
 
 [![NPM](https://nodei.co/npm/iobroker.owfs.png?downloads=true)](https://nodei.co/npm/iobroker.owfs/)
