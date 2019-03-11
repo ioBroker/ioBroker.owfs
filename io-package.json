@@ -98,6 +98,7 @@
     "local":    false,
     "path":     "/mnt/1wire",
     "ip":       "127.0.0.1",
+    "noStateChangeOnError": false,
     "port":     4304,
     "interval": 30,
     "wires" : [

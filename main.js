@@ -349,7 +349,9 @@ function readWire(wire) {
                     if (wire.iButton) {
                         adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
                     } else {
-                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        if (!adapter.config.noStateChangeOnError) {
+                            adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        }
                         adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
                     }
                 }
@@ -382,7 +384,9 @@ function readWire(wire) {
                     if (wire.iButton) {
                         adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
                     } else {
-                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        if (!adapter.config.noStateChangeOnError) {
+                            adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        }
                         adapter.log.warn('Cannot read value of ' + pathfile + ': ' + err);
                     }
                 }
