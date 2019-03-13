@@ -341,8 +341,16 @@ function readWire(wire) {
                         if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
                             adapter.setState('wires.' + wire._name, {val: (result.value == '1'), ack: true, q: 0});
                         } else {
-                            // alse some float value, e.g. temperature
-                            adapter.setState('wires.' + wire._name, {val: parseFloat(result.value) || 0, ack: true, q: 0});
+                            // else some float value, e.g. temperature
+                            let val = parseFloat(result.value);
+                            if (!isNaN(val)) {
+                                adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
+                            } else {
+                                adapter.log.warn('Cannot parse value of ' + pathfile + ': ' + result.value);
+                                if (!adapter.config.noStateChangeOnError) {
+                                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
+                                }
+                            }
                         }
                     }
                 } else {
@@ -376,8 +384,16 @@ function readWire(wire) {
                         if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
                             adapter.setState('wires.' + wire._name, {val: (result == '1'), ack: true, q: 0});
                         } else {
-                            // alse some float value, e.g. temperature
-                            adapter.setState('wires.' + wire._name, {val: parseFloat(result) || 0, ack: true, q: 0});
+                            // else some float value, e.g. temperature
+                            let val = parseFloat(result);
+                            if (!isNaN(val)) {
+                                adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
+                            } else {
+                                adapter.log.warn('Cannot parse value of ' + pathfile + ': ' + result);
+                                if (!adapter.config.noStateChangeOnError) {
+                                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
+                                }
+                            }
                         }
                     }
                 } else {
