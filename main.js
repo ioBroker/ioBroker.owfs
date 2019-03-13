@@ -346,7 +346,7 @@ function readWire(wire) {
                             if (!isNaN(val)) {
                                 adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                             } else {
-                                adapter.log.warn('Cannot parse value of ' + pathfile + ': ' + result.value);
+                                adapter.log.warn('Cannot parse value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + result.value);
                                 if (!adapter.config.noStateChangeOnError) {
                                     adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
                                 }
