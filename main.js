@@ -317,6 +317,14 @@ function getOWFSClient(settings) {
     return client;
 }
 
+function owfs_parseFloat(s) {
+    let val = parseFloat(s);
+    if (!isNaN(val)) {
+        return val;
+    }
+    return parseFloat(s.replace(/^[\s\uFEFF\xA0\x00\x0C]+|[\s\uFEFF\xA0\x00\x0C]+$/g, ''));
+};
+
 function readWire(wire) {
     if (wire.iButton && !wire.property) wire.property = 'r_address';
     if (wire) {
@@ -342,7 +350,7 @@ function readWire(wire) {
                             adapter.setState('wires.' + wire._name, {val: (result.value == '1'), ack: true, q: 0});
                         } else {
                             // else some float value, e.g. temperature
-                            let val = parseFloat(result.value);
+                            let val = owfs_parseFloat(result.value);
                             if (!isNaN(val)) {
                                 adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                             } else {
@@ -385,7 +393,7 @@ function readWire(wire) {
                             adapter.setState('wires.' + wire._name, {val: (result == '1'), ack: true, q: 0});
                         } else {
                             // else some float value, e.g. temperature
-                            let val = parseFloat(result);
+                            let val = owfs_parseFloat(result);
                             if (!isNaN(val)) {
                                 adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                             } else {
