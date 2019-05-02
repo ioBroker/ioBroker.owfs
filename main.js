@@ -317,6 +317,14 @@ function getOWFSClient(settings) {
     return client;
 }
 
+function owfs_parseFloat(s) {
+    let val = parseFloat(s);
+    if (!isNaN(val)) {
+        return val;
+    }
+    return parseFloat(s.replace(/^[\s\uFEFF\xA0\x00\x0C]+|[\s\uFEFF\xA0\x00\x0C]+$/g, ''));
+};
+
 function readWire(wire) {
     if (wire.iButton && !wire.property) wire.property = 'r_address';
     if (wire) {
@@ -341,15 +349,25 @@ function readWire(wire) {
                         if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
                             adapter.setState('wires.' + wire._name, {val: (result.value == '1'), ack: true, q: 0});
                         } else {
-                            // alse some float value, e.g. temperature
-                            adapter.setState('wires.' + wire._name, {val: parseFloat(result.value) || 0, ack: true, q: 0});
+                            // else some float value, e.g. temperature
+                            let val = owfs_parseFloat(result.value);
+                            if (!isNaN(val)) {
+                                adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
+                            } else {
+                                adapter.log.warn('Cannot parse value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + result.value);
+                                if (!adapter.config.noStateChangeOnError) {
+                                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
+                                }
+                            }
                         }
                     }
                 } else {
                     if (wire.iButton) {
                         adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
                     } else {
-                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        if (!adapter.config.noStateChangeOnError) {
+                            adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        }
                         adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
                     }
                 }
@@ -374,15 +392,25 @@ function readWire(wire) {
                         if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
                             adapter.setState('wires.' + wire._name, {val: (result == '1'), ack: true, q: 0});
                         } else {
-                            // alse some float value, e.g. temperature
-                            adapter.setState('wires.' + wire._name, {val: parseFloat(result) || 0, ack: true, q: 0});
+                            // else some float value, e.g. temperature
+                            let val = owfs_parseFloat(result);
+                            if (!isNaN(val)) {
+                                adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
+                            } else {
+                                adapter.log.warn('Cannot parse value of ' + pathfile + ': ' + result);
+                                if (!adapter.config.noStateChangeOnError) {
+                                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
+                                }
+                            }
                         }
                     }
                 } else {
                     if (wire.iButton) {
                         adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
                     } else {
-                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        if (!adapter.config.noStateChangeOnError) {
+                            adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        }
                         adapter.log.warn('Cannot read value of ' + pathfile + ': ' + err);
                     }
                 }
