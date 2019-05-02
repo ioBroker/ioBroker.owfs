@@ -2,13 +2,14 @@
  *
  *      ioBroker OWFS Adapter
  *
- *      Copyright (c) 2015-2016 bluefox<dogafox@gmail.com>
+ *      Copyright (c) 2015-2019 bluefox<dogafox@gmail.com>
  *
  *      MIT License
  *
  */
-/* jshint -W097 */// jshint strict:false
-/*jslint node: true */
+/* jshint -W097 */
+/* jshint strict: false */
+/* jslint node: true */
 'use strict';
 var utils = require('@iobroker/adapter-core'); // Get common adapter utils
 var adapter = utils.Adapter('owfs');
@@ -21,16 +22,14 @@ var objects = {};
 var path1wire;
 var OW_DIRALL = 7; // list 1-wire bus, in one packet string // workaround for owserver
 
-adapter.on('message', function (obj) {
-    if (obj) processMessage(obj);
+adapter.on('message', obj => {
+    obj && processMessage(obj);
     processMessages();
 });
 
-adapter.on('ready', function () {
-    main();
-});
+adapter.on('ready', () => main());
 
-adapter.on('unload', function (callback) {
+adapter.on('unload', callback => {
     for (var t in timers) {
         clearInterval(timers[t].timer);
         timers[t].timer = null;
@@ -38,7 +37,7 @@ adapter.on('unload', function (callback) {
     callback && callback();
 });
 
-adapter.on('stateChange', function (id, state) {
+adapter.on('stateChange', (id, state) => {
     if (!id || !state || state.ack) return;
     if (!adapter.config.wires) return;
 
@@ -86,7 +85,7 @@ function readSensors(oClientOrPath, sensors, result, cb) {
     var sensor = sensors.shift();
 
     if (typeof oClientOrPath === 'object') {
-        oClientOrPath.list('/' + sensor, function(err, dirs) {
+        oClientOrPath.list('/' + sensor, (err, dirs) => {
             result[sensor] = dirs;
             if (dirs) {
                 for (var d = 0; d < dirs.length; d++) {
@@ -98,12 +97,10 @@ function readSensors(oClientOrPath, sensors, result, cb) {
                     }
                 }
             }
-            setTimeout(function () {
-                readSensors(oClientOrPath, sensors, result, cb);
-            }, 0);
+            setTimeout(() => readSensors(oClientOrPath, sensors, result, cb), 0);
         });
     } else {
-        fs.readdir(oClientOrPath + '/' + sensor, function (err, dirs) {
+        fs.readdir(oClientOrPath + '/' + sensor, (err, dirs) => {
             result[sensor] = dirs;
             if (dirs) {
                 for (var d = 0; d < dirs.length; d++) {
@@ -112,9 +109,7 @@ function readSensors(oClientOrPath, sensors, result, cb) {
                     }
                 }
             }
-            setTimeout(function () {
-                readSensors(oClientOrPath, sensors, result, cb);
-            }, 0);
+            setTimeout(() => readSensors(oClientOrPath, sensors, result, cb), 0);
         });
     }
 }
@@ -169,7 +164,7 @@ function processMessage(msg) {
                             adapter.log.debug('Result for list_: ' + JSON.stringify(dirs));
 
                             // read all sensors
-                            readSensors(_client, dirs, null, function (result) {
+                            readSensors(_client, dirs, null, result => {
                                 adapter.log.debug('Result for dir: ' + JSON.stringify(result));
                                 adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
                                 _client = null;
@@ -177,10 +172,10 @@ function processMessage(msg) {
                         }
                     });
                 } else {
-					fs = fs || require('fs');
+		    fs = fs || require('fs');
                     var _path1wire =  msg.message.config ? msg.message.config.path || '/mnt/1wire' : '/mnt/1wire';
                     if (_path1wire[_path1wire.length - 1] === '/') _path1wire = _path1wire.substring(0, _path1wire.length - 1);
-                    fs.readdir(_path1wire, function (err, dirs) {
+                    fs.readdir(_path1wire, (err, dirs) => {
                         if (err) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
@@ -193,9 +188,8 @@ function processMessage(msg) {
                             }
 
                             // read all sensors
-                            readSensors(_path1wire, dirs, null, function (result) {
-                                adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback);
-                            });
+                            readSensors(_path1wire, dirs, null, result =>
+				adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback));
                         }
                     });
                 }
@@ -209,7 +203,7 @@ function processMessage(msg) {
 }
 
 function processMessages() {
-    adapter.getMessage(function (err, obj) {
+    adapter.getMessage((err, obj) => {
         if (obj) {
             processMessage(obj.command, obj.message);
             processMessages();
@@ -234,7 +228,7 @@ function writeWire(wire, value) {
         
         adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + val + '"');
         if (client) {
-            client.write('/' + wire.id + '/' + property, val, function (err, message) {
+            client.write('/' + wire.id + '/' + property, val, (err, message) => {
                 if (message !== undefined) {
                     adapter.log.debug('Response for write /' + wire.name + '/' + property + ': ' + message);
                 }
@@ -261,7 +255,7 @@ function writeWire(wire, value) {
             
             adapter.log.debug(pathFile + ' with "' + val + '"');
             // Write to file
-            fs.writeFile(pathFile, val, function (err/*, written*/) {
+            fs.writeFile(pathFile, val, (err/*, written*/) => {
                 if (err) {
                     // Write error
                     adapter.log.warn('Cannot write value of ' + pathFile + ': ' + JSON.stringify(err));
@@ -289,7 +283,7 @@ function getOWFSClient(settings) {
     client = new OWJS.Client(settings);
 
     client.list = function (path, callback) {
-        this.send(path, null, OW_DIRALL).then(function (messages) {
+        this.send(path, null, OW_DIRALL).then(messages => {
             var ret;
             var str;
             for (var m = 0; m < messages.length; m++) {
@@ -311,9 +305,7 @@ function getOWFSClient(settings) {
             }
             str = str.substring(0, str.length - 1); // remove zero-char from end
             callback(null, str.split(','));
-        }, function (error) {
-            callback(error);
-        });
+        }, error => callback(error));
     };
     return client;
 }
@@ -331,7 +323,7 @@ function readWire(wire) {
     if (wire) {
         if (client) {
             adapter.log.debug('Read ' + '/' + wire.id + '/' + (wire.property || 'temperature'));
-            client.read('/' + wire.id + '/' + (wire.property || 'temperature'), function(err, result) {
+            client.read('/' + wire.id + '/' + (wire.property || 'temperature'), (err, result) => {
                 if (result) {
                     result.value = result.value || '0';
                     result.value = result.value.trim();
@@ -377,7 +369,7 @@ function readWire(wire) {
             var pathfile = path1wire + '/' + wire.id + '/' + (wire.property || 'temperature');
             // Read from file
             adapter.log.debug('Read ' + pathfile);
-            fs.readFile(pathfile, function (err, result) {
+            fs.readFile(pathfile, (err, result) => {
                 if (!err && result) {
                     result = result.toString();
                     adapter.log.debug('Read ' + pathfile + ': ' + result);
@@ -480,12 +472,10 @@ function createState(wire, callback) {
 }
 
 function addState(wire, callback) {
-    adapter.getObject('wires', function (err, obj) {
+    adapter.getObject('wires', (err, obj) => {
         if (err || !obj) {
             // if root does not exist, channel will not be created
-            adapter.createChannel('', 'wires', [], function () {
-                createState(wire, callback);
-            });
+            adapter.createChannel('', 'wires', [], () => createState(wire, callback));
         } else {
             createState(wire, callback);
         }
@@ -493,7 +483,7 @@ function addState(wire, callback) {
 }
 
 function syncConfig(cb) {
-    adapter.getStatesOf('', 'wires', function (err, _states) {
+    adapter.getStatesOf('', 'wires', (err, _states) => {
         var configToDelete = [];
         var configToAdd    = [];
         var k;
