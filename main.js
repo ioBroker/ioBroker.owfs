@@ -30,11 +30,12 @@ adapter.on('ready', function () {
     main();
 });
 
-adapter.on('unload', function () {
+adapter.on('unload', function (callback) {
     for (var t in timers) {
         clearInterval(timers[t].timer);
         timers[t].timer = null;
     }
+    callback && callback();
 });
 
 adapter.on('stateChange', function (id, state) {
