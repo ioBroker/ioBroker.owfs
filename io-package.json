@@ -1,8 +1,20 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.5.0",
+    "version":                  "0.6.0",
     "news": {
+      "0.6.0": {
+        "en": "compact mode supported",
+        "de": "Kompaktmodus unterstützt",
+        "ru": "поддерживается компактный режим",
+        "pt": "modo compacto suportado",
+        "nl": "compacte modus ondersteund",
+        "fr": "mode compact pris en charge",
+        "it": "modalità compatta supportata",
+        "es": "modo compacto compatible",
+        "pl": "obsługiwany tryb kompaktowy",
+        "zh-cn": "支持紧凑模式"
+      },
       "0.5.0": {
         "en": "Ready for Admin3",
         "de": "Bereit für Admin3",
