@@ -99,6 +99,7 @@
     "readme":                   "https://github.com/ioBroker/ioBroker.owfs/blob/master/README.md",
     "loglevel":                 "info",
     "icon":                     "owfs.png",
+    "compact":                  true,
     "messagebox":               true,
     "subscribe":                "messagebox",
     "materialize":              true,

@@ -12,7 +12,6 @@
 /* jslint node: true */
 'use strict';
 var utils = require('@iobroker/adapter-core'); // Get common adapter utils
-var adapter = utils.Adapter('owfs');
 var OWJS    = null;
 var fs      = null;
 
@@ -22,60 +21,72 @@ var objects = {};
 var path1wire;
 var OW_DIRALL = 7; // list 1-wire bus, in one packet string // workaround for owserver
 
-adapter.on('message', obj => {
-    obj && processMessage(obj);
-    processMessages();
-});
+let adapter;
 
-adapter.on('ready', () => main());
+function startAdapter(options) {
+    options = options || {};
+    Object.assign(options, {
+       name: 'owfs'
+    });
+    adapter = new utils.Adapter(options);
 
-adapter.on('unload', callback => {
-    for (var t in timers) {
-        clearInterval(timers[t].timer);
-        timers[t].timer = null;
-    }
-    callback && callback();
-});
+    adapter.on('message', obj => {
+        if (obj) processMessage(obj);
+        processMessages();
+    });
 
-adapter.on('stateChange', (id, state) => {
-    if (!id || !state || state.ack) return;
-    if (!adapter.config.wires) return;
+    adapter.on('ready', () => main());
 
-    var wire;
-    for (var i = 0; i < adapter.config.wires.length; i++) {
-        if (adapter.config.wires[i] && id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
-            if (state.val === true || state.val === 'true') {
-                state.val = 1;
-            } else
-            if (state.val === false || state.val === 'false') {
-                state.val = 0;
-            }
-            wire = adapter.config.wires[i];
-            break;
+    adapter.on('unload', callback => {
+        for (var t in timers) {
+            clearInterval(timers[t].timer);
+            timers[t].timer = null;
         }
-    }
-    if (wire) {
-        if (state.val === null) return;
-        if (!objects[id]) {
-            adapter.getForeignObject(id, function (err, obj) {
-                objects[id] = obj;
-                if (obj && obj.common && !obj.common.write) {
+        callback && callback();
+    });
+
+    adapter.on('stateChange', (id, state) => {
+        if (!id || !state || state.ack) return;
+        if (!adapter.config.wires) return;
+
+        var wire;
+        for (var i = 0; i < adapter.config.wires.length; i++) {
+            if (adapter.config.wires[i] && id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
+                if (state.val === true || state.val === 'true') {
+                    state.val = 1;
+                } else
+                if (state.val === false || state.val === 'false') {
+                    state.val = 0;
+                }
+                wire = adapter.config.wires[i];
+                break;
+            }
+        }
+        if (wire) {
+            if (state.val === null) return;
+            if (!objects[id]) {
+                adapter.getForeignObject(id, function (err, obj) {
+                    objects[id] = obj;
+                    if (obj && obj.common && !obj.common.write) {
+                        adapter.log.debug('Cannot write read only "' + id + '"');
+                        return;
+                    }
+                    writeWire(wire, state.val);
+                });
+            } else {
+                if (objects[id] && objects[id].common && !objects[id].common.write) {
                     adapter.log.debug('Cannot write read only "' + id + '"');
                     return;
                 }
                 writeWire(wire, state.val);
-            });
-        } else {
-            if (objects[id] && objects[id].common && !objects[id].common.write) {
-                adapter.log.debug('Cannot write read only "' + id + '"');
-                return;
             }
-            writeWire(wire, state.val);
+        } else {
+            adapter.log.warn('Wire "' + id + '" not found');
         }
-    } else {
-        adapter.log.warn('Wire "' + id + '" not found');
-    }
-});
+    });
+  
+    return adapter;
+}
 
 function readSensors(oClientOrPath, sensors, result, cb) {
     result = result || {};
@@ -172,7 +183,7 @@ function processMessage(msg) {
                         }
                     });
                 } else {
-		    fs = fs || require('fs');
+                    fs = fs || require('fs');
                     var _path1wire =  msg.message.config ? msg.message.config.path || '/mnt/1wire' : '/mnt/1wire';
                     if (_path1wire[_path1wire.length - 1] === '/') _path1wire = _path1wire.substring(0, _path1wire.length - 1);
                     fs.readdir(_path1wire, (err, dirs) => {
@@ -180,7 +191,7 @@ function processMessage(msg) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
                         } else {
-							for (var d = dirs.length - 1; d >= 0; d--) {
+                            for (var d = dirs.length - 1; d >= 0; d--) {
                                 // remove some constant entries
                                 if (!dirs[d] || ignoreDevices.indexOf(dirs[d]) !== -1 || dirs[d].match(/^bus\./)) {
                                     dirs.splice(d, 1);
@@ -189,7 +200,7 @@ function processMessage(msg) {
 
                             // read all sensors
                             readSensors(_path1wire, dirs, null, result =>
-				adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback));
+                                adapter.sendTo(msg.from, msg.command, {sensors: result}, msg.callback));
                         }
                     });
                 }
@@ -359,7 +370,7 @@ function readWire(wire) {
                         adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
                     } else {
                         if (!adapter.config.noStateChangeOnError) {
-                            adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
                         }
                         adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
                     }
@@ -600,3 +611,10 @@ function main() {
     adapter.subscribeStates('*');
 }
 
+// If started as allInOne/compact mode => return function to create instance
+if (module && module.parent) {
+    module.exports = startAdapter;
+} else {
+    // or start the instance directly
+    startAdapter();
+}
