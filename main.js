@@ -333,12 +333,12 @@ function readWire(wire) {
     if (wire.iButton && !wire.property) wire.property = 'r_address';
     if (wire) {
         if (client) {
-            adapter.log.debug('Read ' + '/' + wire.id + '/' + (wire.property || 'temperature'));
+            adapter.log.debug('Reading ' + '/' + wire.id + '/' + (wire.property || 'temperature'));
             client.read('/' + wire.id + '/' + (wire.property || 'temperature'), (err, result) => {
                 if (result) {
                     result.value = result.value || '0';
                     result.value = result.value.trim();
-                    adapter.log.debug('Read ' + result.path + ':' + result.value);
+                    adapter.log.debug('Read result ' + result.path + ':' + result.value);
                 }
 
                 if (!err && result) {
@@ -358,7 +358,7 @@ function readWire(wire) {
                             if (!isNaN(val)) {
                                 adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                             } else {
-                                adapter.log.warn('Cannot parse value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + result.value);
+                                adapter.log.info('Cannot parse value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + result.value);
                                 if (!adapter.config.noStateChangeOnError) {
                                     adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
                                 }
@@ -372,18 +372,18 @@ function readWire(wire) {
                         if (!adapter.config.noStateChangeOnError) {
                         adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
                         }
-                        adapter.log.warn('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
+                        adapter.log.info('Cannot read value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + err);
                     }
                 }
             });
         } else {
             var pathfile = path1wire + '/' + wire.id + '/' + (wire.property || 'temperature');
             // Read from file
-            adapter.log.debug('Read ' + pathfile);
+            adapter.log.debug('Reading ' + pathfile);
             fs.readFile(pathfile, (err, result) => {
                 if (!err && result) {
                     result = result.toString();
-                    adapter.log.debug('Read ' + pathfile + ': ' + result);
+                    adapter.log.debug('Read result ' + pathfile + ': ' + result);
 
                     if (wire.iButton) {
                         adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports OK
@@ -401,7 +401,7 @@ function readWire(wire) {
                             if (!isNaN(val)) {
                                 adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                             } else {
-                                adapter.log.warn('Cannot parse value of ' + pathfile + ': ' + result);
+                                adapter.log.info('Cannot parse value of ' + pathfile + ': ' + result);
                                 if (!adapter.config.noStateChangeOnError) {
                                     adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
                                 }
@@ -415,7 +415,7 @@ function readWire(wire) {
                         if (!adapter.config.noStateChangeOnError) {
                             adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
                         }
-                        adapter.log.warn('Cannot read value of ' + pathfile + ': ' + err);
+                        adapter.log.info('Cannot read value of ' + pathfile + ': ' + err);
                     }
                 }
             });

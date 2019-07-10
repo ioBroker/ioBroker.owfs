@@ -34,5 +34,17 @@ systemDictionary = {
         "en": "Path to the OWFS directory like '/mnt/1wire'",
         "de": "Pfad zu OWFS Verzeichnis, wie '/mnt/1wire'",
         "ru": "Путь к папке OWFS, как '/mnt/1wire'"
+    },
+    "No state change on error": {
+        "en": "No state change on error",
+        "de": "Keine Zustandsänderung bei Fehler",
+        "ru": "Нет изменений состояния при ошибке",
+        "pt": "Nenhuma mudança de estado no erro",
+        "nl": "Geen statuswijziging op fout",
+        "fr": "Pas de changement d'état en cas d'erreur",
+        "it": "Nessun cambiamento di stato in caso di errore",
+        "es": "No hay cambio de estado en error",
+        "pl": "Brak zmiany stanu po błędzie",
+        "zh-cn": "没有状态改变错误"
     }
 };
