@@ -1,9 +1,9 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.6.0",
+    "version":                  "0.6.1",
     "news": {
-      "0.6.0": {
+      "0.6.1": {
         "en": "compact mode supported",
         "de": "Kompaktmodus unterstützt",
         "ru": "поддерживается компактный режим",
