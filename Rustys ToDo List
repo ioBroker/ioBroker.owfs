@@ -1,0 +1,66 @@
+Sensor 26.1B5C37020000
+up	directory
+B1-R1-A	B1-R1-A
+CA	
+
+EE	
+
+HIH3600	HIH3600
+HIH4000	HIH4000
+HIH5030	HIH5030
+HTM1735	HTM1735
+IAD	
+
+MultiSensor	MultiSensor
+S3-R1-A	S3-R1-A
+VAD	3.78
+VDD	4.9
+address	261B5C37020000F7
+alias	
+crc8	F7
+date	
+Thu Jan  1 06:07:47 1970
+disconnect	disconnect
+endcharge	endcharge
+family	26
+humidity	94.8767
+id	1B5C37020000
+latesttemp	9.59375
+locator	FFFFFFFFFFFFFFFF
+offset	
+1
+pages	pages
+r_address	F7000002375C1B26
+r_id	000002375C1B
+r_locator	FFFFFFFFFFFFFFFF
+temperature	9.59375
+type	DS2438
+udate	
+18479
+vis	0
+
+Strange Values 1087525, 109375, etc., why??
+9.9063	true	owfs.0	2019-10-25 19:56:07.302	
+1087525	true	owfs.0	2019-10-25 19:55:22.361	
+9.7513	true	owfs.0	2019-10-25 19:54:14.914	
+9.9376	true	owfs.0	2019-10-25 19:53:17.356	
+109375	true	owfs.0	2019-10-25 19:52:14.656	
+9.9375	true	owfs.0	2019-10-25 19:51:10.354	
+9.9376	true	owfs.0	2019-10-25 19:50:16.179	
+1090625	true	owfs.0	2019-10-25 19:49:20.316	
+10.125	true	owfs.0	2019-10-25 19:48:10.145	
+1093755	true	owfs.0	2019-10-25 19:47:17.287	
+10.0312	true	owfs.0	2019-10-25 19:46:10.409	
+10.0938	true	owfs.0	2019-10-25 19:45:14.807
+
+Jumps 1°C @ 2019-10-25 19:04:20.670, why??
+10.9375	true	owfs.0	2019-10-25 19:10:13.381	
+11	true	owfs.0	2019-10-25 19:09:07.225	
+11	true	owfs.0	2019-10-25 19:08:19.087	
+10.9375	true	owfs.0	2019-10-25 19:07:11.742	
+10.9375	true	owfs.0	2019-10-25 19:05:11.594	
+11.9375	true	owfs.0	2019-10-25 19:04:20.670	
+10.9375	true	owfs.0	2019-10-25 19:03:11.806	
+10.8755	true	owfs.0	2019-10-25 19:02:18.855	
+10.8125	true	owfs.0	2019-10-25 19:01:10.931	
+10.75	true	owfs.0	2019-10-25 19:00:13.758
