@@ -4,7 +4,7 @@ node-red.0	2019-10-26 11:43:15.128	info	(689) 26 Oct 11:43:15 - [info] [debug:Mn
 node-red.0	2019-10-26 11:43:15.126	info	(689) 26 Oct 11:43:15 - [info] [debug:Mnt 26.1B5C37020000 Value] 10.1562
 node-red.0	2019-10-26 11:43:15.019	info	(689) 26 Oct 11:43:15 - [info] [debug:Outdoor Sensor Error] Temperature Sensor Range Missmatch 10 1096875
 
-RH Sensor
+RH Sensor 26.1B5C37020000
 10.0312	true	owfs.0	2019-10-26 11:44:46.280	
 10.1562	true	owfs.0	2019-10-26 11:43:46.378	
 1096875	true	owfs.0	2019-10-26 11:42:50.590	
@@ -12,7 +12,7 @@ RH Sensor
 10.1562	true	owfs.0	2019-10-26 11:40:47.271	
 10.0312	true	owfs.0	2019-10-26 11:39:45.334
 
-DS Sensor
+DS Sensor 10.6CD23B020800
 10.0625	true	owfs.0	2019-10-26 11:44:46.279	
 10.125	true	owfs.0	2019-10-26 11:43:46.376	
 10	true	owfs.0	2019-10-26 11:42:46.858	
