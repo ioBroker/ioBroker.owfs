@@ -1,3 +1,13 @@
+Other exampe:
+2019-10-27 12:55:52.903	+ 1°C:
+22	true	owfs.0	2019-10-27 13:01:46.285	
+22	true	owfs.0	2019-10-27 12:56:46.576	
+22.9375	true	owfs.0	2019-10-27 12:55:52.903	
+21.9375	true	owfs.0	2019-10-27 12:54:48.510	
+21.9375
+
+>>>> For some reasion this +1°C conversion issue comes when the remainder is .9375
+
 Sensor 26.1B5C37020000
 
 node-red.0	2019-10-26 11:43:15.128	info	(689) 26 Oct 11:43:15 - [info] [debug:Mnt 10.6CD23B020800 Value] 10.125
