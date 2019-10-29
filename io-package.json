@@ -1,8 +1,12 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.6.1",
+    "version":                  "0.6.2",
     "news": {
+      "0.6.2": {
+        "en": "Improved data integrity when reading from local OWFS via file system",
+        "de": "Verbesserte Datenintegrität beim Lesen aus lokalem OWFS via Dateisystem",
+      },
       "0.6.1": {
         "en": "compact mode supported",
         "de": "Kompaktmodus unterstützt",
