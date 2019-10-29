@@ -40,7 +40,7 @@ http://sourceforge.net/projects/owfs/
 
 ## Changelog
 ### 0.6.2 (2019-10-29)
-* (RustyThePropellerHead) Update to improve data integrity when reading from local OWFS via file system
+* (RustyThePropellerHead) Improved data integrity when reading from local OWFS via file system
 
 ### 0.6.1 (2018-07-11)
 * (bluefox) compact mode supported
