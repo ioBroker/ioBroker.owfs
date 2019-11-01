@@ -11,15 +11,15 @@
 /* jshint strict: false */
 /* jslint node: true */
 'use strict';
-var utils = require('@iobroker/adapter-core'); // Get common adapter utils
-var OWJS    = null;
-var fs      = null;
+const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+let OWJS    = null;
+let fs      = null;
 
-var timers  = {};
-var client  = null;
-var objects = {};
-var path1wire;
-var OW_DIRALL = 7; // list 1-wire bus, in one packet string // workaround for owserver
+const timers  = {};
+let client  = null;
+const objects = {};
+let path1wire;
+const OW_DIRALL = 7; // list 1-wire bus, in one packet string // workaround for owserver
 
 let adapter;
 
@@ -38,7 +38,7 @@ function startAdapter(options) {
     adapter.on('ready', () => main());
 
     adapter.on('unload', callback => {
-        for (var t in timers) {
+        for (const t in timers) {
             clearInterval(timers[t].timer);
             timers[t].timer = null;
         }
@@ -49,8 +49,8 @@ function startAdapter(options) {
         if (!id || !state || state.ack) return;
         if (!adapter.config.wires) return;
 
-        var wire;
-        for (var i = 0; i < adapter.config.wires.length; i++) {
+        let wire;
+        for (let i = 0; i < adapter.config.wires.length; i++) {
             if (adapter.config.wires[i] && id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
                 if (state.val === true || state.val === 'true') {
                     state.val = 1;
@@ -65,20 +65,20 @@ function startAdapter(options) {
         if (wire) {
             if (state.val === null) return;
             if (!objects[id]) {
-                adapter.getForeignObject(id, function (err, obj) {
+                adapter.getForeignObject(id, (err, obj) => {
                     objects[id] = obj;
                     if (obj && obj.common && !obj.common.write) {
                         adapter.log.debug('Cannot write read only "' + id + '"');
-                        return;
+                    } else {
+                        writeWire(wire, state.val);
                     }
-                    writeWire(wire, state.val);
                 });
             } else {
                 if (objects[id] && objects[id].common && !objects[id].common.write) {
                     adapter.log.debug('Cannot write read only "' + id + '"');
-                    return;
+                } else {
+                    writeWire(wire, state.val);
                 }
-                writeWire(wire, state.val);
             }
         } else {
             adapter.log.warn('Wire "' + id + '" not found');
@@ -93,13 +93,13 @@ function readSensors(oClientOrPath, sensors, result, cb) {
     if (!sensors || !sensors.length) {
         return cb && cb(result);
     }
-    var sensor = sensors.shift();
+    const sensor = sensors.shift();
 
     if (typeof oClientOrPath === 'object') {
         oClientOrPath.list('/' + sensor, (err, dirs) => {
             result[sensor] = dirs;
             if (dirs) {
-                for (var d = 0; d < dirs.length; d++) {
+                for (let d = 0; d < dirs.length; d++) {
                     if (dirs[d].substring(0, sensor.length + 2) === '/' + sensor + '/') {
                         dirs[d] = dirs[d].substring(sensor.length + 2);
                     }
@@ -114,7 +114,7 @@ function readSensors(oClientOrPath, sensors, result, cb) {
         fs.readdir(oClientOrPath + '/' + sensor, (err, dirs) => {
             result[sensor] = dirs;
             if (dirs) {
-                for (var d = 0; d < dirs.length; d++) {
+                for (let d = 0; d < dirs.length; d++) {
                     if (possibleSubTrees.indexOf(dirs[d]) !== -1) {
                         sensors.push(sensor + '/' + dirs[d]);
                     }
@@ -125,13 +125,13 @@ function readSensors(oClientOrPath, sensors, result, cb) {
     }
 }
 
-var possibleSubTrees = [
+const possibleSubTrees = [
     'LED',
     'relay',
     'set_alarm'
 ];
 
-var ignoreDevices = [
+const ignoreDevices = [
     'alarm',
     'structure',
     'system',
@@ -147,7 +147,7 @@ function processMessage(msg) {
     switch (msg.command) {
         case 'readdir':
             if (msg.callback) {
-                var _client = null;
+                let _client = null;
                 if (msg.message.config && msg.message.config.ip) {
                     adapter.log.debug('Connect to ' + msg.message.config.ip + ':' + msg.message.config.port);
                     _client = getOWFSClient({host: msg.message.config.ip, port: msg.message.config.port});
@@ -156,14 +156,14 @@ function processMessage(msg) {
                 }
 
                 if (_client) {
-                    _client.list('/', function(err, dirs) {
+                    _client.list('/', (err, dirs) => {
                         if (err) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
                             _client = null;
                         } else {
                             adapter.log.debug('Result for list: ' + JSON.stringify(dirs));
-                            for (var d = dirs.length - 1; d >= 0; d--) {
+                            for (let d = dirs.length - 1; d >= 0; d--) {
                                 if (!dirs[d] || dirs[d][0] !== '/') {
                                     dirs.splice(d, 1);
                                 } else {
@@ -184,14 +184,16 @@ function processMessage(msg) {
                     });
                 } else {
                     fs = fs || require('fs');
-                    var _path1wire =  msg.message.config ? msg.message.config.path || '/mnt/1wire' : '/mnt/1wire';
-                    if (_path1wire[_path1wire.length - 1] === '/') _path1wire = _path1wire.substring(0, _path1wire.length - 1);
+                    let _path1wire =  msg.message.config ? msg.message.config.path || '/mnt/1wire' : '/mnt/1wire';
+                    if (_path1wire[_path1wire.length - 1] === '/') {
+                        _path1wire = _path1wire.substring(0, _path1wire.length - 1);
+                    }
                     fs.readdir(_path1wire, (err, dirs) => {
                         if (err) {
                             adapter.log.error('Cannot read dir: ' + err);
                             adapter.sendTo(msg.from, msg.command, {error: err.toString()}, msg.callback);
                         } else {
-                            for (var d = dirs.length - 1; d >= 0; d--) {
+                            for (let d = dirs.length - 1; d >= 0; d--) {
                                 // remove some constant entries
                                 if (!dirs[d] || ignoreDevices.indexOf(dirs[d]) !== -1 || dirs[d].match(/^bus\./)) {
                                     dirs.splice(d, 1);
@@ -224,9 +226,11 @@ function processMessages() {
 
 function writeWire(wire, value) {
     if (wire) {
-        var property = (wire.property || 'temperature');
-        if (property === 'sensed.BYTE') property = 'PIO.BYTE';
-        var val;
+        let property = wire.property || 'temperature';
+        if (property === 'sensed.BYTE') {
+            property = 'PIO.BYTE';
+        }
+        let val;
 
         if (property.indexOf('.ALL') !== -1) {
             val = value;
@@ -262,7 +266,7 @@ function writeWire(wire, value) {
                 }
             });
         } else {
-            var pathFile = path1wire + '/' + wire.id + '/' + property;
+            const pathFile = path1wire + '/' + wire.id + '/' + property;
             
             adapter.log.debug(pathFile + ' with "' + val + '"');
             // Write to file
@@ -295,9 +299,9 @@ function getOWFSClient(settings) {
 
     client.list = function (path, callback) {
         this.send(path, null, OW_DIRALL).then(messages => {
-            var ret;
-            var str;
-            for (var m = 0; m < messages.length; m++) {
+            let ret;
+            let str;
+            for (let m = 0; m < messages.length; m++) {
                 ret = messages[m].header ? messages[m].header.ret : -100;
                 if (messages[m].header && messages[m].header.payload > 0 && messages[m].header.ret >= 0) {
                     str = messages[m].payload;
@@ -321,13 +325,13 @@ function getOWFSClient(settings) {
     return client;
 }
 
-function owfs_parseFloat(s) {
+function owfsParseFloat(s) {
     let val = parseFloat(s);
     if (!isNaN(val)) {
         return val;
     }
     return parseFloat(s.replace(/^[\s\uFEFF\xA0\x00\x0C]+|[\s\uFEFF\xA0\x00\x0C]+$/g, ''));
-};
+}
 
 function readWire(wire) {
     if (wire.iButton && !wire.property) wire.property = 'r_address';
@@ -351,10 +355,10 @@ function readWire(wire) {
                         } else
                         // PIO.0, PIO.1, PIO.A are boolean
                         if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
-                            adapter.setState('wires.' + wire._name, {val: (result.value == '1'), ack: true, q: 0});
+                            adapter.setState('wires.' + wire._name, {val: result.value === '1' || result.value === 1, ack: true, q: 0});
                         } else {
                             // else some float value, e.g. temperature
-                            let val = owfs_parseFloat(result.value);
+                            let val = owfsParseFloat(result.value);
                             if (!isNaN(val)) {
                                 adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                             } else {
@@ -377,12 +381,12 @@ function readWire(wire) {
                 }
             });
         } else {
-            var pathfile = path1wire + '/' + wire.id + '/' + (wire.property || 'temperature');
+            const pathFile = path1wire + '/' + wire.id + '/' + (wire.property || 'temperature');
             // Read from file
-            adapter.log.debug('Reading ' + pathfile);
+            adapter.log.debug('Reading ' + pathFile);
             try {
-                var result = fs.readFileSync(pathfile,'utf8');
-                adapter.log.debug('Read result ' + pathfile + ': ' + result);
+                const result = fs.readFileSync(pathFile, 'utf8').toString();
+                adapter.log.debug('Read result ' + pathFile + ': ' + result);
 
                 if (wire.iButton) {
                     adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports OK
@@ -393,14 +397,14 @@ function readWire(wire) {
                     } else
                     // PIO.0, PIO.1, PIO.A are boolean
                     if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
-                        adapter.setState('wires.' + wire._name, {val: (result == '1'), ack: true, q: 0});
+                        adapter.setState('wires.' + wire._name, {val: result === '1', ack: true, q: 0});
                     } else {
                         // else some float value, e.g. temperature
-                        let val = owfs_parseFloat(result);
+                        let val = owfsParseFloat(result);
                         if (!isNaN(val)) {
                             adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                         } else {
-                            adapter.log.info('Cannot parse value of ' + pathfile + ': ' + result);
+                            adapter.log.info('Cannot parse value of ' + pathFile + ': ' + result);
                             if (!adapter.config.noStateChangeOnError) {
                                 adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
                             }
@@ -414,7 +418,7 @@ function readWire(wire) {
                     if (!adapter.config.noStateChangeOnError) {
                         adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
                     }
-                    adapter.log.info('Cannot read value of ' + pathfile + ': ' + err);
+                    adapter.log.info('Cannot read value of ' + pathFile + ': ' + err);
                 }
             }
         }
@@ -425,12 +429,12 @@ function pollAll(intervalMs) {
     if (!adapter.config.wires) return;
 
     if (!intervalMs) {
-        for (var i = 0; i < adapter.config.wires.length; i++) {
-            if (adapter.config.wires[i]) readWire(adapter.config.wires[i]);
+        for (let i = 0; i < adapter.config.wires.length; i++) {
+            adapter.config.wires[i] && readWire(adapter.config.wires[i]);
         }
     } else if (timers[intervalMs]) {
-        var intPorts = timers[intervalMs].ports;
-        for (var j = 0; j < intPorts.length; j++) {
+        const intPorts = timers[intervalMs].ports;
+        for (let j = 0; j < intPorts.length; j++) {
             readWire(adapter.config.wires[intPorts[j]]);
         }
     } else {
@@ -440,7 +444,7 @@ function pollAll(intervalMs) {
 }
 
 function createState(wire, callback) {
-    var obj = {
+    const obj = {
         name:       (wire.name || wire.id),
         type:       'number',
         read:       true,
@@ -493,10 +497,10 @@ function addState(wire, callback) {
 
 function syncConfig(cb) {
     adapter.getStatesOf('', 'wires', (err, _states) => {
-        var configToDelete = [];
-        var configToAdd    = [];
-        var k;
-        var count = 0;
+        const configToDelete = [];
+        const configToAdd    = [];
+        let k;
+        let count = 0;
         if (adapter.config.wires) {
             for (k = 0; k < adapter.config.wires.length; k++) {
                 if (!adapter.config.wires[k] || (!adapter.config.wires[k].name && !adapter.config.wires[k].id)) {
@@ -510,21 +514,21 @@ function syncConfig(cb) {
         }
 
         if (_states) {
-            for (var j = 0; j < _states.length; j++) {
-                var pos = configToAdd.indexOf(_states[j]._id);
+            for (let j = 0; j < _states.length; j++) {
+                const pos = configToAdd.indexOf(_states[j]._id);
                 // Entry still exists
                 if (pos !== -1) {
                     configToAdd.splice(pos, 1);
 
                     if (adapter.config.wires) {
                         // Check room, id and property
-                        for (var u = 0; u < adapter.config.wires.length; u++) {
+                        for (let u = 0; u < adapter.config.wires.length; u++) {
                             if (!adapter.config.wires[u] || !adapter.config.wires[u]._name) continue;
 
                             if (adapter.namespace + '.wires.' + adapter.config.wires[u]._name === _states[j]._id) {
-                                if (_states[j].common.name != (adapter.config.wires[u].name || adapter.config.wires[u].id) ||
-                                    _states[j].native.id != adapter.config.wires[u].id ||
-                                    _states[j].native.property != adapter.config.wires[u].property) {
+                                if (_states[j].common.name     !== (adapter.config.wires[u].name || adapter.config.wires[u].id) ||
+                                    _states[j].native.id       !== adapter.config.wires[u].id ||
+                                    _states[j].native.property !== adapter.config.wires[u].property) {
                                     adapter.extendObject(_states[j]._id, {
                                         common: {
                                             name: (adapter.config.wires[u].name || adapter.config.wires[u].id)
@@ -538,7 +542,6 @@ function syncConfig(cb) {
                             }
                         }
                     }
-
                 } else {
                     configToDelete.push(_states[j]._id);
                 }
@@ -546,22 +549,20 @@ function syncConfig(cb) {
         }
 
         if (configToAdd.length && adapter.config.wires) {
-            for (var r = 0; r < adapter.config.wires.length; r++) {
+            for (let r = 0; r < adapter.config.wires.length; r++) {
                 if (!adapter.config.wires[r] || !adapter.config.wires[r]._name) continue;
-                if (configToAdd.indexOf(adapter.namespace + '.wires.' + adapter.config.wires[r]._name) != -1) {
+                if (configToAdd.indexOf(adapter.namespace + '.wires.' + adapter.config.wires[r]._name) !== -1) {
                     count++;
-                    addState(adapter.config.wires[r], function () {
-                        if (!--count && cb) cb();
-                    });
+                    addState(adapter.config.wires[r], () =>
+                        !--count && cb && cb());
                 }
             }
         }
         if (configToDelete.length) {
-            for (var e = 0; e < configToDelete.length; e++) {
-                count++
-                adapter.deleteState('', 'wires', configToDelete[e], function () {
-                    if (!--count && cb) cb();
-                });
+            for (let e = 0; e < configToDelete.length; e++) {
+                count++;
+                adapter.deleteState('', 'wires', configToDelete[e], () =>
+                    !--count && cb && cb());
             }
         }
 
@@ -579,14 +580,16 @@ function main() {
     } else {
         fs = require('fs');
         path1wire = adapter.config.path || '/mnt/1wire';
-        if (path1wire[path1wire.length - 1] === '/') path1wire = path1wire.substring(0, path1wire.length - 1);
+        if (path1wire[path1wire.length - 1] === '/') {
+            path1wire = path1wire.substring(0, path1wire.length - 1);
+        }
     }
 
     syncConfig();
     if (!adapter.config.wires) return;
 
     pollAll();
-    for (var i = 0; i < adapter.config.wires.length; i++) {
+    for (let i = 0; i < adapter.config.wires.length; i++) {
         if (!adapter.config.wires[i]) continue;
         if (!adapter.config.wires[i].interval) {
             adapter.config.wires[i].interval = adapter.config.interval * 1000;
