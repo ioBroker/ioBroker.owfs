@@ -1,8 +1,20 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.6.1",
+    "version":                  "0.6.2",
     "news": {
+      "0.6.2": {
+        "en": "Improved data integrity when reading from local OWFS via file system",
+        "de": "Verbesserte Datenintegrität beim Lesen von lokalem OWFS über das Dateisystem",
+        "ru": "Улучшена целостность данных при чтении из локальной OWFS через файловую систему",
+        "pt": "Integridade de dados aprimorada ao ler do OWFS local via sistema de arquivos",
+        "nl": "Verbeterde gegevensintegriteit bij lezen van lokale OWFS via bestandssysteem",
+        "fr": "Amélioration de l'intégrité des données lors de la lecture à partir d'OWFS local via le système de fichiers",
+        "it": "Migliore integrità dei dati durante la lettura da OWFS locale tramite file system",
+        "es": "Integridad de datos mejorada cuando se lee desde OWFS local a través del sistema de archivos",
+        "pl": "Poprawiona integralność danych podczas odczytu z lokalnego OWFS przez system plików",
+        "zh-cn": "通过文件系统从本地OWFS读取时，提高了数据完整性"
+      },
       "0.6.1": {
         "en": "compact mode supported",
         "de": "Kompaktmodus unterstützt",

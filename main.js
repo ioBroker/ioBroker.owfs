@@ -380,45 +380,43 @@ function readWire(wire) {
             var pathfile = path1wire + '/' + wire.id + '/' + (wire.property || 'temperature');
             // Read from file
             adapter.log.debug('Reading ' + pathfile);
-            fs.readFile(pathfile, (err, result) => {
-                if (!err && result) {
-                    result = result.toString();
-                    adapter.log.debug('Read result ' + pathfile + ': ' + result);
+            try {
+                var result = fs.readFileSync(pathfile,'utf8');
+                adapter.log.debug('Read result ' + pathfile + ': ' + result);
 
-                    if (wire.iButton) {
-                        adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports OK
+                if (wire.iButton) {
+                    adapter.setState('wires.' + wire._name, {val: true, ack: true, q: 0}); // sensor reports OK
+                } else {
+                    // ALL is like "0,1"
+                    if (wire.property.indexOf('.ALL') !== -1) {
+                        adapter.setState('wires.' + wire._name, {val: result || '', ack: true, q: 0});
+                    } else
+                    // PIO.0, PIO.1, PIO.A are boolean
+                    if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
+                        adapter.setState('wires.' + wire._name, {val: (result == '1'), ack: true, q: 0});
                     } else {
-                        // ALL is like "0,1"
-                        if (wire.property.indexOf('.ALL') !== -1) {
-                            adapter.setState('wires.' + wire._name, {val: result || '', ack: true, q: 0});
-                        } else
-                        // PIO.0, PIO.1, PIO.A are boolean
-                        if (wire.property.indexOf('PIO') !== -1 && wire.property.indexOf('.BYTE') === -1) {
-                            adapter.setState('wires.' + wire._name, {val: (result == '1'), ack: true, q: 0});
+                        // else some float value, e.g. temperature
+                        let val = owfs_parseFloat(result);
+                        if (!isNaN(val)) {
+                            adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
                         } else {
-                            // else some float value, e.g. temperature
-                            let val = owfs_parseFloat(result);
-                            if (!isNaN(val)) {
-                                adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
-                            } else {
-                                adapter.log.info('Cannot parse value of ' + pathfile + ': ' + result);
-                                if (!adapter.config.noStateChangeOnError) {
-                                    adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
-                                }
+                            adapter.log.info('Cannot parse value of ' + pathfile + ': ' + result);
+                            if (!adapter.config.noStateChangeOnError) {
+                                adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x42}); // sensor reports nonsense
                             }
                         }
                     }
-                } else {
-                    if (wire.iButton) {
-                        adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
-                    } else {
-                        if (!adapter.config.noStateChangeOnError) {
-                            adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
-                        }
-                        adapter.log.info('Cannot read value of ' + pathfile + ': ' + err);
-                    }
                 }
-            });
+            } catch (err) {
+                if (wire.iButton) {
+                    adapter.setState('wires.' + wire._name, {val: false, ack: true, q: 0}); // sensor reports error
+                } else {
+                    if (!adapter.config.noStateChangeOnError) {
+                        adapter.setState('wires.' + wire._name, {val: 0, ack: true, q: 0x84}); // sensor reports error
+                    }
+                    adapter.log.info('Cannot read value of ' + pathfile + ': ' + err);
+                }
+            }
         }
     }
 }
