@@ -20,6 +20,8 @@ let client  = null;
 const objects = {};
 let path1wire;
 const OW_DIRALL = 7; // list 1-wire bus, in one packet string // workaround for owserver
+var alarmPollingTimer = null;
+var activeAlarm = false;
 
 let adapter;
 
@@ -49,6 +51,13 @@ function startAdapter(options) {
         if (!id || !state || state.ack) return;
         if (!adapter.config.wires) return;
 
+        if (id === adapter.namespace + '.alarm') {
+            if (state.val == false)
+                activeAlarm = false;
+            else
+                activeAlarm = true;
+            return;
+        }
         let wire;
         for (let i = 0; i < adapter.config.wires.length; i++) {
             if (adapter.config.wires[i] && id === adapter.namespace + '.wires.' + adapter.config.wires[i]._name) {
@@ -443,6 +452,26 @@ function pollAll(intervalMs) {
 
 }
 
+function pollAlarm() {
+    // ignore polling if pending alarm
+    if (activeAlarm == true) return;
+
+    fs = fs || require('fs');
+    fs.readdir(path1wire + "/alarm", (err, dirs) => {
+        if (err || dirs.length == 0) return;
+
+        activeAlarm = true;            
+        adapter.setState(adapter.namespace + '.alarm', true);
+        for (let d = dirs.length - 1; d >= 0; d--) {
+            adapter.log.info('Alarm on ' + dirs[d]);
+            for (let i = 0; i < adapter.config.wires.length; i++) {
+                if (adapter.config.wires[i] && adapter.config.wires[i].id == dirs[d])
+                    readWire(adapter.config.wires[i]);
+            }
+        }
+    });
+}
+
 function createState(wire, callback) {
     const obj = {
         name:       (wire.name || wire.id),
@@ -607,6 +636,22 @@ function main() {
             timer: setInterval(pollAll, adapter.config.wires[i].interval, adapter.config.wires[i].interval),
             ports: [i]
         };
+    }
+    if (alarmPollingTimer)
+        clearInterval(alarmPollingTimer);
+    if (adapter.config.alarm_interval > 0) {
+        activeAlarm = false;
+        adapter.getObject('', (err, obj) => {
+            adapter.createState('', 'states', 'alarm', false, {
+              read:  true, 
+              write: true, 
+              desc:  "1wire alarm indication", 
+              type:  "boolean", 
+              def:   false
+              role:  'state',
+            });
+        });
+        alarmPollingTimer = setInterval(pollAlarm, adapter.config.alarm_interval);
     }
 
     adapter.subscribeStates('*');
