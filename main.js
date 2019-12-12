@@ -647,8 +647,8 @@ function main() {
               write: true, 
               desc:  "1wire alarm indication", 
               type:  "boolean", 
-              def:   false
-              role:  'state',
+              def:   false,
+              role:  'state'
             });
         });
         alarmPollingTimer = setInterval(pollAlarm, adapter.config.alarm_interval);
