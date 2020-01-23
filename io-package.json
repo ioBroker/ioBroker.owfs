@@ -1,8 +1,20 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.6.2",
+    "version":                  "0.6.3",
     "news": {
+      "0.6.3": {
+        "en": "Added the alarm state handling",
+        "de": "Die Alarmstatusbehandlung wurde hinzugefügt",
+        "ru": "Добавлена обработка состояния тревоги",
+        "pt": "Adicionada a manipulação do estado do alarme",
+        "nl": "Alarmafhandeling toegevoegd",
+        "fr": "Ajout de la gestion de l'état d'alarme",
+        "it": "Aggiunta la gestione dello stato di allarme",
+        "es": "Se agregó el manejo del estado de alarma",
+        "pl": "Dodano obsługę stanu alarmowego",
+        "zh-cn": "添加了警报状态处理"
+      },
       "0.6.2": {
         "en": "Improved data integrity when reading from local OWFS via file system",
         "de": "Verbesserte Datenintegrität beim Lesen von lokalem OWFS über das Dateisystem",
@@ -99,7 +111,8 @@
       "fr": "Permet de lire les capteurs 1wire",
       "it": "Permette di leggere i sensori 1wire",
       "es": "Permite leer 1 sensores de cable",
-      "pl": "Umożliwia odczyt 1 czujników przewodowych"
+      "pl": "Umożliwia odczyt 1 czujników przewodowych",
+      "zh-cn": "允许读取1wire传感器"
     },
     "authors": [
       "bluefox <dogafox@gmail.com>"
@@ -125,6 +138,7 @@
     "ip":       "127.0.0.1",
     "noStateChangeOnError": false,
     "port":     4304,
+    "alarmInterval": 0,
     "interval": 30,
     "wires" : [
       {

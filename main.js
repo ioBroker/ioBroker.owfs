@@ -2,7 +2,7 @@
  *
  *      ioBroker OWFS Adapter
  *
- *      Copyright (c) 2015-2019 bluefox<dogafox@gmail.com>
+ *      Copyright (c) 2015-2020 bluefox<dogafox@gmail.com>
  *
  *      MIT License
  *
@@ -11,7 +11,8 @@
 /* jshint strict: false */
 /* jslint node: true */
 'use strict';
-const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+const utils       = require('@iobroker/adapter-core'); // Get common adapter utils
+const adapterName = require('./package.json').name.split('.').pop();
 let OWJS    = null;
 let fs      = null;
 
@@ -20,22 +21,17 @@ let client  = null;
 const objects = {};
 let path1wire;
 const OW_DIRALL = 7; // list 1-wire bus, in one packet string // workaround for owserver
-var alarmPollingTimer = null;
-var activeAlarm = false;
+let alarmPollingTimer = null;
+let activeAlarm = false;
 
 let adapter;
 
 function startAdapter(options) {
     options = options || {};
-    Object.assign(options, {
-       name: 'owfs'
-    });
+    Object.assign(options, {name: adapterName});
     adapter = new utils.Adapter(options);
 
-    adapter.on('message', obj => {
-        if (obj) processMessage(obj);
-        processMessages();
-    });
+    adapter.on('message', obj => obj && processMessage(obj));
 
     adapter.on('ready', () => main());
 
@@ -43,6 +39,10 @@ function startAdapter(options) {
         for (const t in timers) {
             clearInterval(timers[t].timer);
             timers[t].timer = null;
+        }
+        if (alarmPollingTimer) {
+            clearInterval(alarmPollingTimer);
+            alarmPollingTimer = null;
         }
         callback && callback();
     });
@@ -52,10 +52,7 @@ function startAdapter(options) {
         if (!adapter.config.wires) return;
 
         if (id === adapter.namespace + '.alarm') {
-            if (state.val == false)
-                activeAlarm = false;
-            else
-                activeAlarm = true;
+            activeAlarm = !(state.val === false || state.val === 0 || state.val === '0' || state.val === 'false');
             return;
         }
         let wire;
@@ -72,7 +69,10 @@ function startAdapter(options) {
             }
         }
         if (wire) {
-            if (state.val === null) return;
+            if (state.val === null) {
+                return;
+            }
+
             if (!objects[id]) {
                 adapter.getForeignObject(id, (err, obj) => {
                     objects[id] = obj;
@@ -93,7 +93,7 @@ function startAdapter(options) {
             adapter.log.warn('Wire "' + id + '" not found');
         }
     });
-  
+
     return adapter;
 }
 
@@ -122,13 +122,9 @@ function readSensors(oClientOrPath, sensors, result, cb) {
     } else {
         fs.readdir(oClientOrPath + '/' + sensor, (err, dirs) => {
             result[sensor] = dirs;
-            if (dirs) {
-                for (let d = 0; d < dirs.length; d++) {
-                    if (possibleSubTrees.indexOf(dirs[d]) !== -1) {
-                        sensors.push(sensor + '/' + dirs[d]);
-                    }
-                }
-            }
+
+            dirs && dirs.forEach(dir => possibleSubTrees.includes(dir) && sensors.push(sensor + '/' + dir));
+
             setTimeout(() => readSensors(oClientOrPath, sensors, result, cb), 0);
         });
     }
@@ -151,7 +147,9 @@ const ignoreDevices = [
 ];
 
 function processMessage(msg) {
-    if (!msg || !msg.command) return;
+    if (!msg || !msg.command) {
+        return;
+    }
 
     switch (msg.command) {
         case 'readdir':
@@ -224,15 +222,6 @@ function processMessage(msg) {
     }
 }
 
-function processMessages() {
-    adapter.getMessage((err, obj) => {
-        if (obj) {
-            processMessage(obj.command, obj.message);
-            processMessages();
-        }
-    });
-}
-
 function writeWire(wire, value) {
     if (wire) {
         let property = wire.property || 'temperature';
@@ -249,7 +238,7 @@ function writeWire(wire, value) {
         } else {
             val = parseFloat(value) || 0;
         }
-        
+
         adapter.log.debug('Write /' + wire.id + '/' + (wire.property || 'temperature') + ' with "' + val + '"');
         if (client) {
             client.write('/' + wire.id + '/' + property, val, (err, message) => {
@@ -265,7 +254,7 @@ function writeWire(wire, value) {
                     if (property.indexOf('.ALL') !== -1) {
                         adapter.setState('wires.' + wire._name, value || '', true);
                     } else
-                    // PIO.0, PIO.1, PIO.A are boolean    
+                    // PIO.0, PIO.1, PIO.A are boolean
                     if (property.indexOf('PIO') !== -1 && property.indexOf('.BYTE') === -1) {
                         adapter.setState('wires.' + wire._name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
                     } else {
@@ -276,7 +265,7 @@ function writeWire(wire, value) {
             });
         } else {
             const pathFile = path1wire + '/' + wire.id + '/' + property;
-            
+
             adapter.log.debug(pathFile + ' with "' + val + '"');
             // Write to file
             fs.writeFile(pathFile, val, (err/*, written*/) => {
@@ -289,7 +278,7 @@ function writeWire(wire, value) {
                     if (property.indexOf('.ALL') !== -1) {
                         adapter.setState('wires.' + wire._name, value || '', true);
                     } else
-                    // PIO.0, PIO.1, PIO.A are boolean    
+                    // PIO.0, PIO.1, PIO.A are boolean
                     if (property.indexOf('PIO') !== -1 && property.indexOf('.BYTE') === -1) {
                         adapter.setState('wires.' + wire._name, !(value === '0' || value === 0 || value === 'false' || value === false), true);
                     } else {
@@ -454,21 +443,23 @@ function pollAll(intervalMs) {
 
 function pollAlarm() {
     // ignore polling if pending alarm
-    if (activeAlarm == true) return;
+    if (activeAlarm) {
+        return;
+    }
 
     fs = fs || require('fs');
-    fs.readdir(path1wire + "/alarm", (err, dirs) => {
-        if (err || dirs.length == 0) return;
-
-        activeAlarm = true;            
-        adapter.setState(adapter.namespace + '.alarm', true);
-        for (let d = dirs.length - 1; d >= 0; d--) {
-            adapter.log.info('Alarm on ' + dirs[d]);
-            for (let i = 0; i < adapter.config.wires.length; i++) {
-                if (adapter.config.wires[i] && adapter.config.wires[i].id == dirs[d])
-                    readWire(adapter.config.wires[i]);
-            }
+    fs.readdir(path1wire + '/alarm', (err, dirs) => {
+        if (err || !dirs.length) {
+            return;
         }
+
+        activeAlarm = true;
+        adapter.setState(adapter.namespace + '.alarm', true);
+        dirs.forEach(dir => {
+            adapter.log.info('Alarm on ' + dir);
+            adapter.config.wires.forEach(wire =>
+                wire && wire.id === dir && readWire(wire));
+        });
     });
 }
 
@@ -615,7 +606,10 @@ function main() {
     }
 
     syncConfig();
-    if (!adapter.config.wires) return;
+
+    if (!adapter.config.wires) {
+        return;
+    }
 
     pollAll();
     for (let i = 0; i < adapter.config.wires.length; i++) {
@@ -637,21 +631,27 @@ function main() {
             ports: [i]
         };
     }
-    if (alarmPollingTimer)
+
+    if (alarmPollingTimer) {
         clearInterval(alarmPollingTimer);
-    if (adapter.config.alarm_interval > 0) {
+        alarmPollingTimer = null;
+    }
+
+    adapter.config.alarmInterval = parseInt(adapter.config.alarmInterval, 10);
+
+    if (adapter.config.alarmInterval) {
         activeAlarm = false;
-        adapter.getObject('', (err, obj) => {
-            adapter.createState('', 'states', 'alarm', false, {
-              read:  true, 
-              write: true, 
-              desc:  "1wire alarm indication", 
-              type:  "boolean", 
+        adapter.getObject('states.alarm', (err, obj) => {
+            !obj && adapter.createState('', 'states', 'alarm', false, {
+              read:  true,
+              write: false,
+              desc:  '1wire alarm indication',
+              type:  'boolean',
               def:   false,
               role:  'state'
             });
         });
-        alarmPollingTimer = setInterval(pollAlarm, adapter.config.alarm_interval);
+        alarmPollingTimer = setInterval(pollAlarm, adapter.config.alarmInterval);
     }
 
     adapter.subscribeStates('*');

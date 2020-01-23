@@ -130,17 +130,21 @@
         if (!settings) return;
 
         wires = settings.wires || [];
+        settings.alarmInterval = settings.alarmInterval || 0;
 
         // id is reserved word
         for (var t = 0; t < wires.length; t++) {
             if (wires[t].interval === undefined) wires[t].interval = ''; // use default
         }
 
-        if (!settings.path) settings.path = '/mnt/1wire';
-        if (settings.local === undefined) settings.local = false;
+        settings.path = settings.path || '/mnt/1wire';
+
+        settings.local =  settings.local || false;
 
         for (var key in settings) {
-            if (!settings.hasOwnProperty(key) || key === 'wires') continue;
+            if (!settings.hasOwnProperty(key) || key === 'wires') {
+                continue;
+            }
             setValue(key, settings[key], onChange);
         }
         $('#local').on('change', function () {
@@ -286,8 +290,8 @@
                     <label class="translate" for="interval">Poll interval(sec):</label>
                 </div>
                 <div class="col s12 m4">
-                    <input class="value" id="alarm_interval" min="0" max="100000"/>
-                    <label class="translate" for="interval">Alarm poll interval(msec / 0 = off)</label>
+                    <input class="value" id="alarmInterval" min="0" max="100000"/>
+                    <label class="translate" for="interval">Alarm poll interval(msec, 0 = off)</label>
                 </div>
                 <div class="col s12 m4">
                     <input class="value" id="noStateChangeOnError" type="checkbox"/>
