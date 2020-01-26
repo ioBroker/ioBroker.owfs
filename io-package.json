@@ -1,8 +1,12 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.6.3",
+    "version":                  "0.6.4",
     "news": {
+      "0.6.4": {
+        "en": "Added option to not log 85°C readings. They appear if a DS18B20 has a power failure and returns this initial register value.",
+        "de": "Eine Option, 85°C Werte zu ignorieren wurde hinzugefügt. Diese treten beim DS18B20 nach einem Neustart aufgrund Spannungsverlust auf (Initialwert)."
+      },
       "0.6.3": {
         "en": "Added the alarm state handling",
         "de": "Die Alarmstatusbehandlung wurde hinzugefügt",
@@ -137,6 +141,7 @@
     "path":     "/mnt/1wire",
     "ip":       "127.0.0.1",
     "noStateChangeOnError": false,
+    "noStateChangeOn85C": false,
     "port":     4304,
     "alarmInterval": 0,
     "interval": 30,
