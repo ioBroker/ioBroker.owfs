@@ -1,8 +1,20 @@
 {
   "common": {
     "name":                     "owfs",
-    "version":                  "0.6.3",
+    "version":                  "0.6.4",
     "news": {
+      "0.6.4": {
+        "en": "Added option to not log 85°C readings. They appear if a DS18B20 has a power failure and returns this initial register value.",
+        "de": "Eine Option, 85°C Werte zu ignorieren wurde hinzugefügt. Diese treten beim DS18B20 nach einem Neustart aufgrund Spannungsverlust auf (Initialwert).",
+        "ru": "Добавлена возможность не регистрировать 85 °C показаний. Они появляются, если DS18B20 имеет сбой питания и возвращает это начальное значение регистра.",
+        "pt": "Adicionado opção para não registrar leituras de 85 °C. Eles aparecem se um DS18B20 tiver uma falha de energia e retornar esse valor inicial do registro.",
+        "nl": "Optie toegevoegd om 85 °C-waarden niet te loggen. Ze verschijnen als een DS18B20 een stroomstoring heeft en deze initiële registerwaarde retourneert.",
+        "fr": "Ajout d'une option pour ne pas enregistrer les mesures à 85 °C. Ils apparaissent si un DS18B20 a une panne de courant et renvoie cette valeur de registre initiale.",
+        "it": "Aggiunta opzione per non registrare letture a 85 °C. Appaiono se un DS18B20 ha un'interruzione di corrente e restituisce questo valore iniziale del registro.",
+        "es": "Opción agregada para no registrar lecturas de 85 °C. Aparecen si un DS18B20 tiene una falla de energía y devuelve este valor de registro inicial.",
+        "pl": "Dodano opcję nie rejestrowania odczytów 85 °C. Pojawiają się, jeśli DS18B20 ma awarię zasilania i zwraca tę początkową wartość rejestru.",
+        "zh-cn": "添加了不记录85°C读数的选项。如果DS18B20断电并返回该初始寄存器值，则会显示它们。"
+      },
       "0.6.3": {
         "en": "Added the alarm state handling",
         "de": "Die Alarmstatusbehandlung wurde hinzugefügt",
@@ -137,6 +149,7 @@
     "path":     "/mnt/1wire",
     "ip":       "127.0.0.1",
     "noStateChangeOnError": false,
+    "noStateChangeOn85C": false,
     "port":     4304,
     "alarmInterval": 0,
     "interval": 30,
