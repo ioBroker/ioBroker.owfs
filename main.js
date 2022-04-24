@@ -404,7 +404,11 @@ function readWire(wire) {
                         // else some float value, e.g. temperature
                         let val = owfsParseFloat(result);
                         if (!isNaN(val)) {
-                            adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
+                            if (adapter.config.noStateChangeOn85C && val >= 84.999 && val <= 85.001) {
+                                    adapter.log.info('Ignoring 85.0°C value of /' + wire.id + '/' + (wire.property || 'temperature') + ': ' + result.value);
+                                } else {
+                                    adapter.setState('wires.' + wire._name, {val: val, ack: true, q: 0});
+                                }
                         } else {
                             adapter.log.info('Cannot parse value of ' + pathFile + ': ' + result);
                             if (!adapter.config.noStateChangeOnError) {
