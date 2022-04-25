@@ -45,7 +45,7 @@ http://sourceforge.net/projects/owfs/
 ## Changelog
 
 ### __WORK IN PROGRESS__
-* IMPORTANT: Requires at least js-controller 2.0
+* IMPORTANT: Requires now at least js-controller 2.0
 * (boellner) ignore 85 degree error value for file system too
 * (Apollon77) Add sentry for crash reporting
 
