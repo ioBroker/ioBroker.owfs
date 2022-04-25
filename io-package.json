@@ -1,274 +1,178 @@
 {
-    "common": {
-        "name": "owfs",
-        "version": "0.6.4",
-        "news": {
-            "0.6.4": {
-                "en": "Added option to not log 85°C readings. They appear if a DS18B20 has a power failure and returns this initial register value.",
-                "de": "Eine Option, 85°C Werte zu ignorieren wurde hinzugefügt. Diese treten beim DS18B20 nach einem Neustart aufgrund Spannungsverlust auf (Initialwert).",
-                "ru": "Добавлена возможность не регистрировать 85 °C показаний. Они появляются, если DS18B20 имеет сбой питания и возвращает это начальное значение регистра.",
-                "pt": "Adicionado opção para não registrar leituras de 85 °C. Eles aparecem se um DS18B20 tiver uma falha de energia e retornar esse valor inicial do registro.",
-                "nl": "Optie toegevoegd om 85 °C-waarden niet te loggen. Ze verschijnen als een DS18B20 een stroomstoring heeft en deze initiële registerwaarde retourneert.",
-                "fr": "Ajout d'une option pour ne pas enregistrer les mesures à 85 °C. Ils apparaissent si un DS18B20 a une panne de courant et renvoie cette valeur de registre initiale.",
-                "it": "Aggiunta opzione per non registrare letture a 85 °C. Appaiono se un DS18B20 ha un'interruzione di corrente e restituisce questo valore iniziale del registro.",
-                "es": "Opción agregada para no registrar lecturas de 85 °C. Aparecen si un DS18B20 tiene una falla de energía y devuelve este valor de registro inicial.",
-                "pl": "Dodano opcję nie rejestrowania odczytów 85 °C. Pojawiają się, jeśli DS18B20 ma awarię zasilania i zwraca tę początkową wartość rejestru.",
-                "zh-cn": "添加了不记录85°C读数的选项。如果DS18B20断电并返回该初始寄存器值，则会显示它们。"
-            },
-            "0.6.3": {
-                "en": "Added the alarm state handling",
-                "de": "Die Alarmstatusbehandlung wurde hinzugefügt",
-                "ru": "Добавлена обработка состояния тревоги",
-                "pt": "Adicionada a manipulação do estado do alarme",
-                "nl": "Alarmafhandeling toegevoegd",
-                "fr": "Ajout de la gestion de l'état d'alarme",
-                "it": "Aggiunta la gestione dello stato di allarme",
-                "es": "Se agregó el manejo del estado de alarma",
-                "pl": "Dodano obsługę stanu alarmowego",
-                "zh-cn": "添加了警报状态处理"
-            },
-            "0.6.2": {
-                "en": "Improved data integrity when reading from local OWFS via file system",
-                "de": "Verbesserte Datenintegrität beim Lesen von lokalem OWFS über das Dateisystem",
-                "ru": "Улучшена целостность данных при чтении из локальной OWFS через файловую систему",
-                "pt": "Integridade de dados aprimorada ao ler do OWFS local via sistema de arquivos",
-                "nl": "Verbeterde gegevensintegriteit bij lezen van lokale OWFS via bestandssysteem",
-                "fr": "Amélioration de l'intégrité des données lors de la lecture à partir d'OWFS local via le système de fichiers",
-                "it": "Migliore integrità dei dati durante la lettura da OWFS locale tramite file system",
-                "es": "Integridad de datos mejorada cuando se lee desde OWFS local a través del sistema de archivos",
-                "pl": "Poprawiona integralność danych podczas odczytu z lokalnego OWFS przez system plików",
-                "zh-cn": "通过文件系统从本地OWFS读取时，提高了数据完整性"
-            },
-            "0.6.1": {
-                "en": "compact mode supported",
-                "de": "Kompaktmodus unterstützt",
-                "ru": "поддерживается компактный режим",
-                "pt": "modo compacto suportado",
-                "nl": "compacte modus ondersteund",
-                "fr": "mode compact pris en charge",
-                "it": "modalità compatta supportata",
-                "es": "modo compacto compatible",
-                "pl": "obsługiwany tryb kompaktowy",
-                "zh-cn": "支持紧凑模式"
-            },
-            "0.5.0": {
-                "en": "Ready for Admin3",
-                "de": "Bereit für Admin3",
-                "ru": "Готово для администратора3",
-                "pt": "Pronto para Admin3",
-                "nl": "Klaar voor Admin3",
-                "fr": "Prêt pour Admin3",
-                "it": "Pronto per Admin3",
-                "es": "Listo para Admin3",
-                "pl": "Gotowy na administratora3",
-                "zh-cn": "准备好管理员3"
-            },
-            "0.4.1": {
-                "en": "fix translation",
-                "de": "Übersetzung verbessert",
-                "ru": "fix translation",
-                "pt": "corrigir tradução",
-                "nl": "vertaling repareren",
-                "fr": "corriger la traduction",
-                "it": "correggere la traduzione",
-                "es": "corregir la traducción",
-                "pl": "napraw tłumaczenie",
-                "zh-cn": "修复翻译"
-            },
-            "0.4.0": {
-                "en": "support iButtons",
-                "de": "Unterstützung von iButtons",
-                "ru": "Поддержка iButtons",
-                "pt": "suporte iButtons",
-                "nl": "ondersteuning iButtons",
-                "fr": "prend en charge les iButtons",
-                "it": "supporta gli iButton",
-                "es": "soporte iButtons",
-                "pl": "wsparcie iButtons",
-                "zh-cn": "支持 iButton"
-            },
-            "0.3.4": {
-                "en": "filter out service entries by list",
-                "de": "Serviceeinträge Ausfiltren bei Detektieren des Sensors",
-                "ru": "Не показывть сервисные названия при поиске сенсоров",
-                "pt": "filtrar entradas de serviço por lista",
-                "nl": "filter service-items op lijst",
-                "fr": "filtrer les entrées de service par liste",
-                "it": "filtra le voci di servizio per elenco",
-                "es": "filtrar las entradas de servicio por lista",
-                "pl": "odfiltrować wpisy usług według listy",
-                "zh-cn": "按列表过滤服务条目"
-            },
-            "0.3.3": {
-                "en": "add custom interval for every sensor",
-                "de": "Intervalleinstellung für jeden Sensor",
-                "ru": "Настройка интервалов для каждого сенсора",
-                "pt": "adicionar intervalo personalizado para cada sensor",
-                "nl": "voeg een aangepast interval toe voor elke sensor",
-                "fr": "ajouter un intervalle personnalisé pour chaque capteur",
-                "it": "aggiungi un intervallo personalizzato per ogni sensore",
-                "es": "agregue un intervalo personalizado para cada sensor",
-                "pl": "dodaj niestandardowy interwał dla każdego czujnika",
-                "zh-cn": "为每个传感器添加自定义间隔"
-            },
-            "0.3.2": {
-                "en": "support of local OWFS via file system",
-                "de": "Unterstützung von LokalOWFS mit Dateisystem",
-                "ru": "Поддержка локальной OWFS через файловую систему",
-                "pt": "suporte de OWFS local via sistema de arquivos",
-                "nl": "ondersteuning van lokale OWFS via bestandssysteem",
-                "fr": "prise en charge d'OWFS local via le système de fichiers",
-                "it": "supporto di OWFS locali tramite file system",
-                "es": "soporte de OWFS local a través del sistema de archivos",
-                "pl": "obsługa lokalnych OWFS przez system plików",
-                "zh-cn": "通过文件系统支持本地 OWFS"
-            },
-            "0.2.2": {
-                "en": "add new datapoints: pressure, volts, ...",
-                "de": "add new datapoints: pressure, volts, ...",
-                "ru": "add new datapoints: pressure, volts, ...",
-                "pt": "adicionar novos pontos de dados: pressão, volts, ...",
-                "nl": "nieuwe datapunten toevoegen: druk, volt, ...",
-                "fr": "ajouter de nouveaux points de données : pression, volts, ...",
-                "it": "aggiungi nuovi punti dati: pressione, volt, ...",
-                "es": "agregar nuevos puntos de datos: presión, voltios, ...",
-                "pl": "dodaj nowe punkty danych: ciśnienie, wolty, ...",
-                "zh-cn": "添加新数据点：压力、伏特、..."
-            },
-            "0.2.1": {
-                "en": "fixes of write",
-                "de": "fixes of write",
-                "ru": "fixes of write",
-                "pt": "correções de gravação",
-                "nl": "fixes van schrijven",
-                "fr": "corrections d'écriture",
-                "it": "correzioni di scrittura",
-                "es": "arreglos de escritura",
-                "pl": "poprawki zapisu",
-                "zh-cn": "写入的修复"
-            },
-            "0.2.0": {
-                "en": "discover sensors\nuse other npm library to fix write",
-                "de": "discover sensors\nuse other npm library to fix write",
-                "ru": "discover sensors\nuse other npm library to fix write",
-                "pt": "descobrir sensores\n",
-                "nl": "ontdek sensoren\n",
-                "fr": "découvrir les capteurs\n",
-                "it": "scopri i sensori\n",
-                "es": "descubrir sensores\n",
-                "pl": "odkryj czujniki\n",
-                "zh-cn": "发现传感器\n"
-            },
-            "0.1.1": {
-                "en": "check configuration",
-                "de": "check configuration",
-                "ru": "check configuration",
-                "pt": "verifique a configuração",
-                "nl": "controleer configuratie",
-                "fr": "vérifier la configuration",
-                "it": "controllare la configurazione",
-                "es": "comprobar la configuración",
-                "pl": "sprawdź konfigurację",
-                "zh-cn": "检查配置"
-            },
-            "0.1.0": {
-                "en": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
-                "de": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
-                "ru": "remove rooms\nfix creation of states\nconvert states to numbers\nsupport of quality codes",
-                "pt": "remover quartos\n",
-                "nl": "kamers verwijderen\n",
-                "fr": "supprimer des pièces\n",
-                "it": "rimuovere le stanze\n",
-                "es": "eliminar habitaciones\n",
-                "pl": "usuń pokoje\n",
-                "zh-cn": "删除房间\n"
-            }
-        },
-        "title": "1Wire OWFS",
-        "titleLang": {
-            "en": "1Wire OWFS",
-            "de": "1Wire-OWFS",
-            "ru": "1Wire OWFS",
-            "pt": "1 Fio OWFS",
-            "nl": "1Draad OWFS",
-            "fr": "OWFS à 1 fil",
-            "it": "1 filo OWFS",
-            "es": "1 cable OWFS",
-            "pl": "1Wire OWFS",
-            "zh-cn": "1Wire OWFS"
-        },
-        "desc": {
-            "en": "Allows to read 1wire sensors",
-            "de": "Ermöglicht das Lesen von 1-Draht-Sensoren",
-            "ru": "Позволяет читать 1-проводные датчики",
-            "pt": "Permite ler sensores de 1 fio",
-            "nl": "Maakt het mogelijk om 1wire-sensoren te lezen",
-            "fr": "Permet de lire les capteurs 1wire",
-            "it": "Permette di leggere i sensori 1wire",
-            "es": "Permite leer 1 sensores de cable",
-            "pl": "Umożliwia odczyt 1 czujników przewodowych",
-            "zh-cn": "允许读取1wire传感器"
-        },
-        "authors": [
-            "bluefox <dogafox@gmail.com>"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "mode": "daemon",
-        "availableModes": [
-            "daemon"
-        ],
-        "readme": "https://github.com/ioBroker/ioBroker.owfs/blob/master/README.md",
-        "loglevel": "info",
-        "icon": "owfs.png",
-        "compact": true,
-        "messagebox": true,
-        "subscribe": "messagebox",
-        "materialize": true,
-        "keywords": [
-            "owfs",
-            "one wire",
-            "1wire"
-        ],
-        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.owfs/master/admin/owfs.png",
-        "type": "hardware",
-        "dataSource": "poll",
-        "connectionType": "local",
-        "tier": 2,
-        "dependencies": [
-            {
-                "js-controller": ">=2.0.0"
-            }
-        ],
-        "plugins": {
-            "sentry": {
-                "dsn": "https://773f5ba71a2a4ef18efb48259fdc73ba@sentry.iobroker.net/193"
-            }
-        }
+  "common": {
+    "name": "owfs",
+    "version": "0.7.0",
+    "news": {
+      "0.7.0": {
+        "en": "IMPORTANT: Requires now at least js-controller 2.0\nignore 85 degree error value for file system too\nAdd sentry for crash reporting",
+        "de": "WICHTIG: Benötigt jetzt mindestens js-controller 2.0\nIgnorieren Sie auch den 85-Grad-Fehlerwert für das Dateisystem\nSentry für Absturzberichte hinzufügen",
+        "ru": "ВАЖНО: теперь требуется как минимум js-controller 2.0\nигнорировать значение ошибки 85 градусов и для файловой системы\nДобавить часового для отчетов о сбоях",
+        "pt": "IMPORTANTE: Requer agora pelo menos js-controller 2.0\nignore o valor de erro de 85 graus para o sistema de arquivos também\nAdicionar sentinela para relatórios de falhas",
+        "nl": "BELANGRIJK: vereist nu ten minste js-controller 2.0\nnegeer ook de foutwaarde van 85 graden voor het bestandssysteem\nEen schildwacht toevoegen voor crashrapportage",
+        "fr": "IMPORTANT : Nécessite maintenant au moins js-controller 2.0\nignorer également la valeur d'erreur de 85 degrés pour le système de fichiers\nAjouter une sentinelle pour les rapports de plantage",
+        "it": "IMPORTANTE: ora richiede almeno js-controller 2.0\nignora anche il valore di errore di 85 gradi per il file system\nAggiungi sentinella per la segnalazione degli arresti anomali",
+        "es": "IMPORTANTE: Requiere ahora al menos js-controller 2.0\nignore el valor de error de 85 grados para el sistema de archivos también\nAgregar centinela para informes de fallas",
+        "pl": "WAŻNE: wymaga teraz co najmniej js-controller 2.0\nzignoruj również wartość błędu 85 stopni dla systemu plików\nDodaj wartownika do zgłaszania awarii",
+        "zh-cn": "重要提示：现在至少需要 js-controller 2.0\n也忽略文件系统的 85 度错误值\n为崩溃报告添加哨兵"
+      },
+      "0.6.4": {
+        "en": "Added option to not log 85°C readings. They appear if a DS18B20 has a power failure and returns this initial register value.",
+        "de": "Eine Option, 85°C Werte zu ignorieren wurde hinzugefügt. Diese treten beim DS18B20 nach einem Neustart aufgrund Spannungsverlust auf (Initialwert).",
+        "ru": "Добавлена возможность не регистрировать 85 °C показаний. Они появляются, если DS18B20 имеет сбой питания и возвращает это начальное значение регистра.",
+        "pt": "Adicionado opção para não registrar leituras de 85 °C. Eles aparecem se um DS18B20 tiver uma falha de energia e retornar esse valor inicial do registro.",
+        "nl": "Optie toegevoegd om 85 °C-waarden niet te loggen. Ze verschijnen als een DS18B20 een stroomstoring heeft en deze initiële registerwaarde retourneert.",
+        "fr": "Ajout d'une option pour ne pas enregistrer les mesures à 85 °C. Ils apparaissent si un DS18B20 a une panne de courant et renvoie cette valeur de registre initiale.",
+        "it": "Aggiunta opzione per non registrare letture a 85 °C. Appaiono se un DS18B20 ha un'interruzione di corrente e restituisce questo valore iniziale del registro.",
+        "es": "Opción agregada para no registrar lecturas de 85 °C. Aparecen si un DS18B20 tiene una falla de energía y devuelve este valor de registro inicial.",
+        "pl": "Dodano opcję nie rejestrowania odczytów 85 °C. Pojawiają się, jeśli DS18B20 ma awarię zasilania i zwraca tę początkową wartość rejestru.",
+        "zh-cn": "添加了不记录85°C读数的选项。如果DS18B20断电并返回该初始寄存器值，则会显示它们。"
+      },
+      "0.6.3": {
+        "en": "Added the alarm state handling",
+        "de": "Die Alarmstatusbehandlung wurde hinzugefügt",
+        "ru": "Добавлена обработка состояния тревоги",
+        "pt": "Adicionada a manipulação do estado do alarme",
+        "nl": "Alarmafhandeling toegevoegd",
+        "fr": "Ajout de la gestion de l'état d'alarme",
+        "it": "Aggiunta la gestione dello stato di allarme",
+        "es": "Se agregó el manejo del estado de alarma",
+        "pl": "Dodano obsługę stanu alarmowego",
+        "zh-cn": "添加了警报状态处理"
+      },
+      "0.6.2": {
+        "en": "Improved data integrity when reading from local OWFS via file system",
+        "de": "Verbesserte Datenintegrität beim Lesen von lokalem OWFS über das Dateisystem",
+        "ru": "Улучшена целостность данных при чтении из локальной OWFS через файловую систему",
+        "pt": "Integridade de dados aprimorada ao ler do OWFS local via sistema de arquivos",
+        "nl": "Verbeterde gegevensintegriteit bij lezen van lokale OWFS via bestandssysteem",
+        "fr": "Amélioration de l'intégrité des données lors de la lecture à partir d'OWFS local via le système de fichiers",
+        "it": "Migliore integrità dei dati durante la lettura da OWFS locale tramite file system",
+        "es": "Integridad de datos mejorada cuando se lee desde OWFS local a través del sistema de archivos",
+        "pl": "Poprawiona integralność danych podczas odczytu z lokalnego OWFS przez system plików",
+        "zh-cn": "通过文件系统从本地OWFS读取时，提高了数据完整性"
+      },
+      "0.6.1": {
+        "en": "compact mode supported",
+        "de": "Kompaktmodus unterstützt",
+        "ru": "поддерживается компактный режим",
+        "pt": "modo compacto suportado",
+        "nl": "compacte modus ondersteund",
+        "fr": "mode compact pris en charge",
+        "it": "modalità compatta supportata",
+        "es": "modo compacto compatible",
+        "pl": "obsługiwany tryb kompaktowy",
+        "zh-cn": "支持紧凑模式"
+      },
+      "0.5.0": {
+        "en": "Ready for Admin3",
+        "de": "Bereit für Admin3",
+        "ru": "Готово для администратора3",
+        "pt": "Pronto para Admin3",
+        "nl": "Klaar voor Admin3",
+        "fr": "Prêt pour Admin3",
+        "it": "Pronto per Admin3",
+        "es": "Listo para Admin3",
+        "pl": "Gotowy na administratora3",
+        "zh-cn": "准备好管理员3"
+      },
+      "0.4.1": {
+        "en": "fix translation",
+        "de": "Übersetzung verbessert",
+        "ru": "fix translation",
+        "pt": "corrigir tradução",
+        "nl": "vertaling repareren",
+        "fr": "corriger la traduction",
+        "it": "correggere la traduzione",
+        "es": "corregir la traducción",
+        "pl": "napraw tłumaczenie",
+        "zh-cn": "修复翻译"
+      }
     },
-    "native": {
-        "local": false,
-        "path": "/mnt/1wire",
-        "ip": "127.0.0.1",
-        "noStateChangeOnError": false,
-        "noStateChangeOn85C": false,
-        "port": 4304,
-        "alarmInterval": 0,
-        "interval": 30,
-        "wires": [
-            {
-                "name": "Sensor1",
-                "id": "10.C8F148010800",
-                "property": "temperature",
-                "iButton": false
-            },
-            {
-                "name": "Sensor2",
-                "id": "10.040349010801",
-                "property": "temperature",
-                "iButton": false
-            }
-        ]
+    "title": "1Wire OWFS",
+    "titleLang": {
+      "en": "1Wire OWFS",
+      "de": "1Wire-OWFS",
+      "ru": "1Wire OWFS",
+      "pt": "1 Fio OWFS",
+      "nl": "1Draad OWFS",
+      "fr": "OWFS à 1 fil",
+      "it": "1 filo OWFS",
+      "es": "1 cable OWFS",
+      "pl": "1Wire OWFS",
+      "zh-cn": "1Wire OWFS"
     },
-    "objects": []
+    "desc": {
+      "en": "Allows to read 1wire sensors",
+      "de": "Ermöglicht das Lesen von 1-Draht-Sensoren",
+      "ru": "Позволяет читать 1-проводные датчики",
+      "pt": "Permite ler sensores de 1 fio",
+      "nl": "Maakt het mogelijk om 1wire-sensoren te lezen",
+      "fr": "Permet de lire les capteurs 1wire",
+      "it": "Permette di leggere i sensori 1wire",
+      "es": "Permite leer 1 sensores de cable",
+      "pl": "Umożliwia odczyt 1 czujników przewodowych",
+      "zh-cn": "允许读取1wire传感器"
+    },
+    "authors": [
+      "bluefox <dogafox@gmail.com>"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "availableModes": [
+      "daemon"
+    ],
+    "readme": "https://github.com/ioBroker/ioBroker.owfs/blob/master/README.md",
+    "loglevel": "info",
+    "icon": "owfs.png",
+    "compact": true,
+    "messagebox": true,
+    "subscribe": "messagebox",
+    "materialize": true,
+    "keywords": [
+      "owfs",
+      "one wire",
+      "1wire"
+    ],
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.owfs/master/admin/owfs.png",
+    "type": "hardware",
+    "dataSource": "poll",
+    "connectionType": "local",
+    "tier": 2,
+    "dependencies": [
+      {
+        "js-controller": ">=2.0.0"
+      }
+    ],
+    "plugins": {
+      "sentry": {
+        "dsn": "https://773f5ba71a2a4ef18efb48259fdc73ba@sentry.iobroker.net/193"
+      }
+    }
+  },
+  "native": {
+    "local": false,
+    "path": "/mnt/1wire",
+    "ip": "127.0.0.1",
+    "noStateChangeOnError": false,
+    "noStateChangeOn85C": false,
+    "port": 4304,
+    "alarmInterval": 0,
+    "interval": 30,
+    "wires": [
+      {
+        "name": "Sensor1",
+        "id": "10.C8F148010800",
+        "property": "temperature",
+        "iButton": false
+      },
+      {
+        "name": "Sensor2",
+        "id": "10.040349010801",
+        "property": "temperature",
+        "iButton": false
+      }
+    ]
+  },
+  "objects": []
 }

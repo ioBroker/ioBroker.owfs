@@ -43,8 +43,7 @@ Before you must create the directroy */mnt/1wire* with command `mkdir /mnt/1wire
 http://sourceforge.net/projects/owfs/
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 0.7.0 (2022-04-25)
 * IMPORTANT: Requires now at least js-controller 2.0
 * (boellner) ignore 85 degree error value for file system too
 * (Apollon77) Add sentry for crash reporting
