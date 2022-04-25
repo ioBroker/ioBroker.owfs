@@ -117,7 +117,7 @@ function readSensors(oClientOrPath, sensors, result, cb) {
                     }
                 }
             }
-            setTimeout(() => readSensors(oClientOrPath, sensors, result, cb), 0);
+            setImmediate(() => readSensors(oClientOrPath, sensors, result, cb));
         });
     } else {
         fs.readdir(oClientOrPath + '/' + sensor, (err, dirs) => {
@@ -125,7 +125,7 @@ function readSensors(oClientOrPath, sensors, result, cb) {
 
             dirs && dirs.forEach(dir => possibleSubTrees.includes(dir) && sensors.push(sensor + '/' + dir));
 
-            setTimeout(() => readSensors(oClientOrPath, sensors, result, cb), 0);
+            setImmediate(() => readSensors(oClientOrPath, sensors, result, cb));
         });
     }
 }
