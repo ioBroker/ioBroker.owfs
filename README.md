@@ -32,7 +32,7 @@ owserver -d "/dev/ttyUSB0" --nozero
 
 This command starts the 1wire server on local port 4304.
 
-- To show the data from the local 1wire server in the file system call follwing command: 
+- To show the data from the local 1wire server in the file system call following command: 
 
 ```
 owfs -C -m /mnt/1wire --allow_other
