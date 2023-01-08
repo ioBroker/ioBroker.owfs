@@ -4,7 +4,7 @@
     "ID": "Sensor ID",
     "IP Address of OWFS Server:": "IP Address of OWFS Server:",
     "Interval": "Poll interval(sec)",
-    "Name": "Name",
+    "Name": "name",
     "No state change on 85°C reading (initial state of DS18B20 in case of power failure)": "No state change on 85°C reading (initial state of DS18B20 in case of power failure)",
     "No state change on error": "No state change on error",
     "OWFS adapter settings": "OWFS adapter settings",
