@@ -2,7 +2,7 @@
     "Alarm poll interval(msec, 0 = off)": "Alarmabrufintervall (ms, 0 = aus)",
     "Found %s sensors": "%s Sensoren gefunden",
     "ID": "Sensor ID",
-    "IP Address of OWFS Server:": "IP Adresse vom OWFS-Server:",
+    "IP Address of OWFS Server:": "IP-Adresse des OWFS-Servers:",
     "Interval": "Poll-Intervall(sek)",
     "Name": "Name",
     "No state change on 85°C reading (initial state of DS18B20 in case of power failure)": "Keine Zustandsänderung bei 85 °C Wert (Initialzustand von DS18B20 bei Stromausfall)",
