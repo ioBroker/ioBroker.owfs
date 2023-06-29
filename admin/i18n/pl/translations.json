@@ -9,7 +9,7 @@
     "No state change on error": "Brak zmiany stanu w przypadku błędu",
     "OWFS adapter settings": "Ustawienia adaptera OWFS",
     "OWFS server settings": "Ustawienia serwera OWFS",
-    "Ok": "Dobrze",
+    "Ok": "Ok",
     "Path to OWFS mount:": "Ścieżka do montowania OWFS:",
     "Poll interval(sec):": "Domyślny interwał sondowania (s):",
     "Port of OWFS Server:": "Port serwera OWFS:",
