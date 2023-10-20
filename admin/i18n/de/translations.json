@@ -8,7 +8,7 @@
     "No state change on 85°C reading (initial state of DS18B20 in case of power failure)": "Keine Zustandsänderung bei 85 °C Wert (Initialzustand von DS18B20 bei Stromausfall)",
     "No state change on error": "Keine Zustandsänderung bei Fehler",
     "OWFS adapter settings": "OWFS Adapter-Einstellungen",
-    "OWFS server settings": "OWFS Server Einstellungen",
+    "OWFS server settings": "OWFS Servereinstellungen",
     "Ok": "Ok",
     "Path to OWFS mount:": "Pfad zu OWFS-Mount:",
     "Poll interval(sec):": "Default Poll-Intervall(sek):",
