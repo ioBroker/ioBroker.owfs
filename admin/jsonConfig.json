@@ -1,0 +1,123 @@
+{
+    "type": "tabs",
+    "i18n": true,
+    "items": {
+        "_main": {
+            "type": "panel",
+            "label": "OWFS server settings",
+            "items": {
+                "local": {
+                    "type": "checkbox",
+                    "label": "Use local OWFS",
+                    "sm": 12,
+                    "md": 4
+                },
+                "path": {
+                    "newLine": true,
+                    "type": "text",
+                    "label": "Path to OWFS mount",
+                    "sm": 12,
+                    "md": 4
+                },
+                "ip": {
+                    "newLine": true,
+                    "type": "text",
+                    "label": "IP Address of OWFS Server",
+                    "sm": 12,
+                    "md": 4
+                },
+                "port": {
+                    "type": "number",
+                    "min": 1,
+                    "max": 65535,
+                    "label": "Port of OWFS Server",
+                    "sm": 12,
+                    "md": 4
+                },
+                "interval": {
+                    "newLine": true,
+                    "type": "number",
+                    "min": 0,
+                    "max": 100000,
+                    "label": "Poll interval",
+                    "help": "seconds",
+                    "sm": 12,
+                    "md": 4
+                },
+                "alarmInterval": {
+                    "type": "number",
+                    "min": 0,
+                    "max": 100000,
+                    "label": "Alarm poll interval",
+                    "help": "milliseconds, 0 = off",
+                    "sm": 12,
+                    "md": 4
+                },
+                "noStateChangeOnError": {
+                    "newLine": true,
+                    "type": "checkbox",
+                    "label": "No state change on error",
+                    "sm": 12,
+                    "md": 4
+                },
+                "noStateChangeOn85C": {
+                    "type": "checkbox",
+                    "label": "No state change on 85°C reading",
+                    "help": "Initial state of DS18B20 in case of power failure",
+                    "sm": 12,
+                    "md": 4
+                }
+            }
+        },
+        "_addresses": {
+            "type": "panel",
+            "label": "Wires addresses",
+            "items": {
+                "_readAddresses": {
+                    "type": "sendTo",
+                    "command": "readdir",
+                    "label": "refresh",
+                    "jsonData": "{ \"local\": ${!!data.local}, \"path\": \"${data.path}\", \"ip\": \"${data.ip}\", \"port\": ${data.port} }"
+                },
+                "wires": {
+                    "type": "table",
+                    "showSecondAddAt": 10,
+                    "export": true,
+                    "import": true,
+                    "items": [
+                        {
+                            "type": "text",
+                            "attr": "name",
+                            "label": "Name"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "id",
+                            "label": "ID",
+                            "width": "20%"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "property",
+                            "label": "Property",
+                            "width": 120
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "iButton",
+                            "label": "iButton",
+                            "width": 60
+                        },
+                        {
+                            "type": "number",
+                            "attr": "interval",
+                            "label": "Interval (sec)",
+                            "title": "in seconds",
+                            "width": 80
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

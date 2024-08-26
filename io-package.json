@@ -88,7 +88,6 @@
         "zh-cn": "修复翻译"
       }
     },
-    "title": "1Wire OWFS",
     "titleLang": {
       "en": "1Wire OWFS",
       "de": "1Wire-OWFS",
@@ -116,7 +115,10 @@
     "authors": [
       "bluefox <dogafox@gmail.com>"
     ],
-    "license": "MIT",
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "availableModes": [
@@ -127,8 +129,10 @@
     "icon": "owfs.png",
     "compact": true,
     "messagebox": true,
-    "subscribe": "messagebox",
     "materialize": true,
+    "adminUI": {
+      "config": "materialize"
+    },
     "keywords": [
       "owfs",
       "one wire",

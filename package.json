@@ -28,7 +28,6 @@
     "@alcalzone/release-script-plugin-iobroker": "^3.5.9",
     "@alcalzone/release-script-plugin-license": "^3.7.0",
     "@iobroker/testing": "^4.1.0",
-    "gulp": "^4.0.2",
     "mocha": "^10.2.0",
     "chai": "^4.3.7",
     "axios": "^1.7.5"
@@ -37,6 +36,13 @@
     "url": "https://github.com/ioBroker/ioBroker.owfs/issues"
   },
   "main": "main.js",
+  "files": [
+    "admin/",
+    "lib/",
+    "main.js",
+    "io-package.json",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "npm run test:package && npm run test:unit",
     "test:package": "mocha test/package --exit",
