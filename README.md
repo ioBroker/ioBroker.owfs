@@ -40,6 +40,9 @@ Before you must create the directory */mnt/1wire* with command `mkdir /mnt/1wire
 http://sourceforge.net/projects/owfs/
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+- (iobroker-bot) Adapter requires node.js >= 20 now.
 ### 0.7.0 (2022-04-25)
 * IMPORTANT: Requires now at least js-controller 2.0
 * (boellner) ignore 85 degree error value for file system too

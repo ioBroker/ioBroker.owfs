@@ -7,7 +7,7 @@
     "bluefox <dogafox@gmail.com>"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "homepage": "https://github.com/ioBroker/ioBroker.owfs",
   "license": "MIT",
