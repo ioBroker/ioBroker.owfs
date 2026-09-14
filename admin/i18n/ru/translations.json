@@ -4,7 +4,7 @@
     "ID": "ID сенсора",
     "IP Address of OWFS Server:": "IP адрес OWFS сервера:",
     "Interval": "Интервал опроса(сек)",
-    "Name": "Имя сенсора",
+    "Name": "Имя",
     "No state change on 85°C reading (initial state of DS18B20 in case of power failure)": "Без изменения состояния при показаниях 85 °C (начальное состояние DS18B20 в случае сбоя питания)",
     "No state change on error": "Нет изменений состояния при ошибке",
     "OWFS adapter settings": "Настройки драйвера OWFS",
