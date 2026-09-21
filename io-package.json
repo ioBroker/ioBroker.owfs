@@ -129,7 +129,6 @@
     "icon": "owfs.png",
     "compact": true,
     "messagebox": true,
-    "materialize": true,
     "adminUI": {
       "config": "materialize"
     },
