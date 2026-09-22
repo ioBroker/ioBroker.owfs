@@ -4,7 +4,7 @@
     "ID": "传感器ID",
     "IP Address of OWFS Server:": "OWFS服务器的IP地址：",
     "Interval": "轮询间隔（秒）",
-    "Name": "名称",
+    "Name": "姓名",
     "No state change on 85°C reading (initial state of DS18B20 in case of power failure)": "85°C读数无状态变化（断电时DS18B20的初始状态）",
     "No state change on error": "错误无状态变化",
     "OWFS adapter settings": "OWFS适配器设置",
