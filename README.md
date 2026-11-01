@@ -42,6 +42,7 @@ http://sourceforge.net/projects/owfs/
 ## Changelog
 
 ### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22.19.0 now
 - (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
 
 ### 0.7.0 (2022-04-25)
